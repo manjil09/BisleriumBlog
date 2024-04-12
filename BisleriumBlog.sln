@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34322.80
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BisleriumBlog.Domain", "BisleriumBlog.Domain\BisleriumBlog.Domain.csproj", "{859F5276-3E9F-4992-B34E-5748537BA6B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BisleriumBlog.Domain", "BisleriumBlog.Domain\BisleriumBlog.Domain.csproj", "{859F5276-3E9F-4992-B34E-5748537BA6B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BisleriumBlog.Infrastructure", "BisleriumBlog.Infrastructure\BisleriumBlog.Infrastructure.csproj", "{64D9173A-CEF6-4AFD-87DC-E4666E8DC253}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{859F5276-3E9F-4992-B34E-5748537BA6B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{859F5276-3E9F-4992-B34E-5748537BA6B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{859F5276-3E9F-4992-B34E-5748537BA6B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64D9173A-CEF6-4AFD-87DC-E4666E8DC253}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64D9173A-CEF6-4AFD-87DC-E4666E8DC253}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64D9173A-CEF6-4AFD-87DC-E4666E8DC253}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64D9173A-CEF6-4AFD-87DC-E4666E8DC253}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
