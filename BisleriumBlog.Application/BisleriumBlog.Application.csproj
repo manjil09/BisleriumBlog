@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BisleriumBlog.Application\BisleriumBlog.Application.csproj" />
+    <ProjectReference Include="..\BisleriumBlog.Domain\BisleriumBlog.Domain.csproj" />
   </ItemGroup>
 
 </Project>
