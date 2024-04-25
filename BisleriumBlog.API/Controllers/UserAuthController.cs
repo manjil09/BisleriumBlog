@@ -15,8 +15,8 @@ namespace BisleriumBlog.API.Controllers
             this.userAuthRepository = userAuthRepository;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RegisterUser([FromBody] UserRegisterDTO userForRegister)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] UserRegisterDTO userForRegister)
         {
             var result = await userAuthRepository.Register(userForRegister);
             if(!result.IsSuccess)
