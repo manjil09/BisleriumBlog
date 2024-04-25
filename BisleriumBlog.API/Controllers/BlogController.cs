@@ -1,4 +1,5 @@
-﻿using BisleriumBlog.Application.Interfaces.IRepositories;
+﻿using BisleriumBlog.Application.DTOs;
+using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,7 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddBlog(Blog blog)
+        public async Task<IActionResult> AddBlog(BlogDTO blog)
         {
             var data = await blogRepository.AddBlog(blog);
             return Ok(data);

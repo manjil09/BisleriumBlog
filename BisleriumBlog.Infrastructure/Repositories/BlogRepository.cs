@@ -19,20 +19,30 @@ namespace BisleriumBlog.Infrastructure.Repositories
             this.appDbContext = appDbContext;
         }
 
-        public async Task<Blog> AddBlog(Blog blog)
+        public async Task<BlogDTO> AddBlog(BlogDTO blog)
         {
-            var addBlog = new Blog()
+            var newBlog = new Blog()
             {
                 Title = blog.Title,
                 Body = blog.Body,
                 Image = blog.Image,
                 UserId = blog.UserId,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
             };
 
-            await appDbContext.Blogs.AddAsync(addBlog);
+            await appDbContext.Blogs.AddAsync(newBlog);
             await appDbContext.SaveChangesAsync();
 
-            return addBlog;
+            var result = new BlogDTO()
+            {
+                Title = newBlog.Title,
+                Body = newBlog.Body,
+                Image = newBlog.Image,
+                UserId = blog.UserId,
+            };
+
+            return result;
         }
 
         public Task<List<BlogDTO>> GetAllBlogs()
