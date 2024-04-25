@@ -15,7 +15,5 @@ namespace BisleriumBlog.Infrastructure.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<BlogReaction> BlogReactions { get; set; }
         public DbSet<CommentReaction> CommentReactions { get; set; }
-
-        
     }
 }

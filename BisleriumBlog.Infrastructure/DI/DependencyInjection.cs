@@ -17,8 +17,8 @@ namespace BisleriumBlog.Infrastructure.DI
 
             services.AddIdentity<IdentityUser, IdentityRole>(options => {
                 options.SignIn.RequireConfirmedAccount = false;
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 6;
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
@@ -26,7 +26,7 @@ namespace BisleriumBlog.Infrastructure.DI
                 .AddEntityFrameworkStores<AppDbContext>();
 
             services.AddTransient<IBlogRepository, BlogRepository>();
-            
+            services.AddTransient<IUserAuthRepository, UserAuthRepository>();
 
             return services;
         }

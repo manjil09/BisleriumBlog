@@ -9,7 +9,7 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
     public interface IUserAuthRepository
     {
-        Task<ResponseDTO> Register(UserRegisterDTO user);
-        Task<ResponseDTO> Login(UserLoginDTO user);
+        Task<ResponseDTO> Register(UserRegisterDTO userForRegister);
+        Task<ResponseDTO> Login(UserLoginDTO userForLogin);
     }
 }
