@@ -8,6 +8,7 @@ builder.Services.AddControllers();
 
 // Register services of Infrastructure layer
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.ConfigureJWT(builder.Configuration);
 
 builder.Services.AddAuthentication();
 
