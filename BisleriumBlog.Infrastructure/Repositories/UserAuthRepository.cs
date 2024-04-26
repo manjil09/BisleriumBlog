@@ -1,11 +1,6 @@
 ﻿using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BisleriumBlog.Infrastructure.Repositories
 {
@@ -33,7 +28,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
             var result = await userManager.CreateAsync(user, userForRegister.Password);
             if (!result.Succeeded)
-                return new ResponseDTO() { IsSuccess = false, Message = "Failed to register user! "+ result.Errors.FirstOrDefault()?.Description ?? "Please enter the details again." };
+                return new ResponseDTO() { IsSuccess = false, Message = "Failed to register user! " + result.Errors.FirstOrDefault()?.Description ?? "Please enter the details again." };
 
             return new ResponseDTO() { IsSuccess = true, Message = "User registration successful!" };
         }

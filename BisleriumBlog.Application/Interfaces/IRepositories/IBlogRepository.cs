@@ -1,5 +1,4 @@
 ﻿using BisleriumBlog.Application.DTOs;
-using BisleriumBlog.Domain.Entities;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
