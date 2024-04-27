@@ -1,5 +1,6 @@
 ﻿using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
+using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -21,7 +22,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             this.configuration = configuration;
         }
 
-        public async Task<ResponseDTO> Register(UserRegisterDTO userForRegister)
+        public async Task<ResponseDTO> Register(UserRegisterDTO userForRegister, UserRole role = UserRole.User)
         {
             var existingUser = await userManager.FindByNameAsync(userForRegister.UserName);
             if (existingUser != null)
@@ -36,6 +37,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
             var result = await userManager.CreateAsync(user, userForRegister.Password);
             if (!result.Succeeded)
                 return new ResponseDTO() { IsSuccess = false, Message = "Failed to register user! " + result.Errors.FirstOrDefault()?.Description ?? "Please enter the details again." };
+
+            await userManager.AddToRoleAsync(user, role.ToString());
 
             return new ResponseDTO() { IsSuccess = true, Message = "User registration successful!" };
         }
@@ -60,7 +63,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
         private SigningCredentials GetSigningCredentials()
         {
             var jwtConfig = configuration.GetSection("JwtConfig");
-            var key = Encoding.UTF8.GetBytes(jwtConfig["SecretKey"]);
+            var key = Encoding.UTF8.GetBytes(jwtConfig["SecretKey"]!);
             var secret = new SymmetricSecurityKey(key);
 
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);

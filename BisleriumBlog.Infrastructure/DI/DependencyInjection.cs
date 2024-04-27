@@ -37,12 +37,11 @@ namespace BisleriumBlog.Infrastructure.DI
         }
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
         {
-            var jwtConfig = configuration.GetSection("JwtConfig");
-            var secretKey = jwtConfig["SecretKey"];
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
                 .AddJwtBearer(options =>
                 {
@@ -52,9 +51,9 @@ namespace BisleriumBlog.Infrastructure.DI
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtConfig["ValidIssuer"],
-                        ValidAudience = jwtConfig["ValidAudience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                        ValidIssuer = configuration["JwtConfig:Issuer"],
+                        ValidAudience = configuration["JwtConfig:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtConfig:SecretKey"]!))
                     };
                 });
         }

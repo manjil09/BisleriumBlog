@@ -1,10 +1,11 @@
 ﻿using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
+using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BisleriumBlog.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/user")]
     [ApiController]
     public class UserAuthController : ControllerBase
     {
@@ -17,10 +18,22 @@ namespace BisleriumBlog.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDTO userForRegister)
         {
+            //bool isAdmin = HttpContext.User.IsInRole(UserRole.Admin.ToString());
+            //var result = await userAuthRepository.Register(userForRegister, isAdmin ? UserRole.Admin : UserRole.User);
+
             var result = await userAuthRepository.Register(userForRegister);
-            if(!result.IsSuccess)
+
+            if (!result.IsSuccess)
                 return BadRequest(result.Message);
             return Ok(result.Message);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginDTO userForLogin)
+        {
+            if (await userAuthRepository.ValidateUser(userForLogin))
+                return Ok(new { Token = await userAuthRepository.CreateToken() });
+            return BadRequest("Invalid username or password!");
         }
     }
 }
