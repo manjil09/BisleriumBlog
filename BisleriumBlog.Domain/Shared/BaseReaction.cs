@@ -1,5 +1,4 @@
 ﻿using BisleriumBlog.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace BisleriumBlog.Domain.Shared
 {
