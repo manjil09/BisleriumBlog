@@ -1,6 +1,7 @@
 ﻿using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
+using BisleriumBlog.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -38,7 +39,15 @@ namespace BisleriumBlog.Infrastructure.Repositories
             if (!result.Succeeded)
                 return new ResponseDTO() { IsSuccess = false, Message = "Failed to register user! " + result.Errors.FirstOrDefault()?.Description ?? "Please enter the details again." };
 
-            await userManager.AddToRoleAsync(user, role.ToString());
+            try
+            {
+                var addToRoleResult = await userManager.AddToRoleAsync(user, role.ToString());
+            }
+            catch (InvalidOperationException)
+            {
+                await userManager.DeleteAsync(user);
+                return new ResponseDTO() { IsSuccess = false, Message = "Failed to assign a role to the user!" };
+            }
 
             return new ResponseDTO() { IsSuccess = true, Message = "User registration successful!" };
         }
@@ -63,10 +72,9 @@ namespace BisleriumBlog.Infrastructure.Repositories
         private SigningCredentials GetSigningCredentials()
         {
             var jwtConfig = configuration.GetSection("JwtConfig");
-            var key = Encoding.UTF8.GetBytes(jwtConfig["SecretKey"]!);
-            var secret = new SymmetricSecurityKey(key);
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig["SecretKey"]!));
 
-            return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
+            return new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
         }
 
         private async Task<List<Claim>> GetClaims()
@@ -93,7 +101,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             issuer: jwtSettings["ValidIssuer"],
             audience: jwtSettings["ValidAudience"],
             claims: claims,
-            expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["ExpiresIn"])),
+            expires: DateTime.Now.AddHours(Convert.ToDouble(jwtSettings["ExpiresIn"])),
             signingCredentials: signingCredentials
             );
 

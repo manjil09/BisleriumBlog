@@ -32,7 +32,10 @@ namespace BisleriumBlog.API.Controllers
         public async Task<IActionResult> Login([FromBody] UserLoginDTO userForLogin)
         {
             if (await userAuthRepository.ValidateUser(userForLogin))
-                return Ok(new { Token = await userAuthRepository.CreateToken() });
+            {
+                string token = await userAuthRepository.CreateToken();
+                return Ok(token);
+            }
             return BadRequest("Invalid username or password!");
         }
     }
