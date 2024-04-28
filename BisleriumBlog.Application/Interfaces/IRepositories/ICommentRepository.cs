@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
-    internal class ICommentRepository
+    public class ICommentRepository
     {
+
     }
 }

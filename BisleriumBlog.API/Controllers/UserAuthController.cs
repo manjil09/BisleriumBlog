@@ -1,7 +1,9 @@
 ﻿using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BisleriumBlog.API.Controllers
 {
@@ -18,10 +20,18 @@ namespace BisleriumBlog.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDTO userForRegister)
         {
-            //bool isAdmin = HttpContext.User.IsInRole(UserRole.Admin.ToString());
-            //var result = await userAuthRepository.Register(userForRegister, isAdmin ? UserRole.Admin : UserRole.User);
-
             var result = await userAuthRepository.Register(userForRegister);
+
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
+            return Ok(result.Message);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("registerAdmin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] UserRegisterDTO userForRegister)
+        {
+            var result = await userAuthRepository.Register(userForRegister, UserRole.Admin);
 
             if (!result.IsSuccess)
                 return BadRequest(result.Message);

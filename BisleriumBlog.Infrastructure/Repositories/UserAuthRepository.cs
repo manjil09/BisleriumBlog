@@ -27,7 +27,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
         {
             var existingUser = await userManager.FindByNameAsync(userForRegister.UserName);
             if (existingUser != null)
-                return new ResponseDTO() { IsSuccess = false, Message = "User already exists!" };
+                return new ResponseDTO() { IsSuccess = false, Message = "User name already exists!" };
 
             IdentityUser user = new()
             {
@@ -98,8 +98,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
             var jwtSettings = configuration.GetSection("JwtConfig");
             var tokenOptions = new JwtSecurityToken
             (
-            issuer: jwtSettings["ValidIssuer"],
-            audience: jwtSettings["ValidAudience"],
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
             claims: claims,
             expires: DateTime.Now.AddHours(Convert.ToDouble(jwtSettings["ExpiresIn"])),
             signingCredentials: signingCredentials
