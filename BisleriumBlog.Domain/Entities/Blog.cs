@@ -10,7 +10,7 @@ namespace BisleriumBlog.Domain.Entities
         public string Title { get; set; }
         public string Body { get; set; }
         public string Image { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public List<Comment> Comments{ get; set; } //referencing one to many relation with comment entity
         public List<BlogReaction> Reactions { get; set; } //referencing one to many relation with blogReaction entity
 

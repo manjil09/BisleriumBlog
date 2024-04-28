@@ -16,7 +16,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
         private IdentityUser? user;
-
+        
         public UserAuthRepository(UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             this.userManager = userManager;

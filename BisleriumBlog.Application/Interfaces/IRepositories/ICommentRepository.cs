@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BisleriumBlog.Application.Common;
+using BisleriumBlog.Application.DTOs;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
-    public class ICommentRepository
+    public interface ICommentRepository
     {
-
+        Task<CommentDTO> AddComment(CommentDTO comment);
+        Task<CommentDTO> UpdateComment(int commentId, CommentDTO blogForUpdate);
+        Task<List<CommentDTO>> GetCommentsByBlogId(int blogId);
+        Task<CommentDTO> GetCommentById(int commentId);
+        Task<List<CommentDTO>> GetCommentsByUserId(string userId);
+        Task<bool> DeleteComment(int commentId);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
+using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,7 @@ namespace BisleriumBlog.API.Controllers
             this.blogRepository = blogRepository;
         }
 
-        [Authorize]
+        //[Authorize(Roles = "User")]
         [HttpPost]
         public async Task<IActionResult> AddBlog(BlogDTO blog)
         {
@@ -23,7 +24,6 @@ namespace BisleriumBlog.API.Controllers
             return Ok(data);
         }
 
-        //for get blog without authentication
-        //[AllowAnonymous]
+
     }
 }

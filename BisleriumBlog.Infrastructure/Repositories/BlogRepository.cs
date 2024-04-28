@@ -1,4 +1,5 @@
-﻿using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.Common;
+using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Infrastructure.Data;
@@ -40,7 +41,12 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return result;
         }
 
-        public Task<List<BlogDTO>> GetAllBlogs()
+        public Task<bool> DeleteBlog(int blogId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<BlogDTO>> GetAllBlogs(bool sortByPopularity = false)
         {
             throw new NotImplementedException();
         }
@@ -48,6 +54,20 @@ namespace BisleriumBlog.Infrastructure.Repositories
         public Task<BlogDTO> GetBlogById(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public Task<List<BlogDTO>> GetBlogsByUserId(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<BlogDTO> UpdateBlog(int blogId, BlogDTO updatedBlog)
+        {
+            var blogForUpdate = await appDbContext.Blogs.FindAsync(blogId);
+            if (blogForUpdate != null) { }
+
+            throw new NotImplementedException();
+
         }
     }
 }
