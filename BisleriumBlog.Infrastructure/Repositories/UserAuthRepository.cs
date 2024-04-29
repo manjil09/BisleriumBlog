@@ -1,4 +1,5 @@
-﻿using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.Common;
+using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
 using BisleriumBlog.Infrastructure.Data;
@@ -16,18 +17,18 @@ namespace BisleriumBlog.Infrastructure.Repositories
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
         private IdentityUser? user;
-        
+
         public UserAuthRepository(UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             this.userManager = userManager;
             this.configuration = configuration;
         }
 
-        public async Task<ResponseDTO> Register(UserRegisterDTO userForRegister, UserRole role = UserRole.User)
+        public async Task<Response<string>> Register(UserRegisterDTO userForRegister, UserRole role = UserRole.User)
         {
             var existingUser = await userManager.FindByNameAsync(userForRegister.UserName);
             if (existingUser != null)
-                return new ResponseDTO() { IsSuccess = false, Message = "User name already exists!" };
+                return new Response<string>() { IsSuccess = false, Message = "User name already exists!" };
 
             IdentityUser user = new()
             {
@@ -37,7 +38,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
             var result = await userManager.CreateAsync(user, userForRegister.Password);
             if (!result.Succeeded)
-                return new ResponseDTO() { IsSuccess = false, Message = "Failed to register user! " + result.Errors.FirstOrDefault()?.Description ?? "Please enter the details again." };
+                return new Response<string>() { IsSuccess = false, Message = "Failed to register user! " + result.Errors.FirstOrDefault()?.Description ?? "Please enter the details again." };
 
             try
             {
@@ -46,10 +47,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
             catch (InvalidOperationException)
             {
                 await userManager.DeleteAsync(user);
-                return new ResponseDTO() { IsSuccess = false, Message = "Failed to assign a role to the user!" };
+                return new Response<string>() { IsSuccess = false, Message = "Failed to assign a role to the user!" };
             }
 
-            return new ResponseDTO() { IsSuccess = true, Message = "User registration successful!" };
+            return new Response<string>() { IsSuccess = true, Message = "User registration successful!" };
         }
 
         public async Task<bool> ValidateUser(UserLoginDTO userForLogin)
@@ -60,13 +61,18 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return false;
         }
 
-        public async Task<string> CreateToken()
+        public async Task<Response<string>> CreateToken()
         {
             var signingCredentials = GetSigningCredentials();
             var claims = await GetClaims();
             var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
 
-            return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+            return new Response<string>()
+            {
+                IsSuccess = true,
+                Message = "User Login successful!",
+                Result = new JwtSecurityTokenHandler().WriteToken(tokenOptions)
+            };
         }
 
         private SigningCredentials GetSigningCredentials()

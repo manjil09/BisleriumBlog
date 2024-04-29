@@ -1,7 +1,11 @@
-﻿using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.Common;
+using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
+using BisleriumBlog.Domain.Enums;
 using BisleriumBlog.Infrastructure.Data;
+using BisleriumBlog.Infrastructure.Mapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace BisleriumBlog.Infrastructure.Repositories
 {
@@ -16,28 +20,21 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<BlogDTO> AddBlog(BlogDTO blog)
         {
-            var newBlog = new Blog()
-            {
-                Title = blog.Title,
-                Body = blog.Body,
-                Image = blog.Image,
-                UserId = blog.UserId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
+            //var newBlog = new Blog()
+            //{
+            //    Title = blog.Title,
+            //    Body = blog.Body,
+            //    Image = blog.Image,
+            //    UserId = blog.UserId,
+            //    CreatedAt = DateTime.Now,
+            //    UpdatedAt = DateTime.Now,
+            //};
+            var newBlog = MapperlyMapper.BlogDTOToBlog(blog);
 
             await appDbContext.Blogs.AddAsync(newBlog);
             await appDbContext.SaveChangesAsync();
 
-            var result = new BlogDTO()
-            {
-                Title = newBlog.Title,
-                Body = newBlog.Body,
-                Image = newBlog.Image,
-                UserId = blog.UserId,
-            };
-
-            return result;
+            return blog;
         }
 
         public async Task<bool> DeleteBlog(int blogId)
@@ -51,15 +48,41 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return true;
         }
 
-        public Task<List<BlogDTO>> GetAllBlogs(bool sortByPopularity = false)
+        public async Task<List<BlogDTO>> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Random)
         {
+            IQueryable<Blog> blogQuery = appDbContext.Blogs;
+            
+            switch (sortBy)
+            {
+                case SortType.Recency:
+                    blogQuery = blogQuery.OrderByDescending(x => x.CreatedAt); // To sort by descending creation date
+                    break;
+                case SortType.Popularity:
 
-            throw new NotImplementedException();
+                    throw new NotImplementedException();
+                    break;
+                case SortType.Random:
+                default:
+                    blogQuery = blogQuery.OrderBy(x => Guid.NewGuid()); // To sort randomly
+                    break;
+            }
+
+            //var blogs = await blogQuery.ToListAsync();
+            var paginatedBlogs = await PaginatedList<Blog>.CreateAsync(blogQuery, pageIndex ?? 1, pageSize ?? 10);
+
+            var blogDTOs = paginatedBlogs.Select(MapperlyMapper.BlogToBlogDTO).ToList();
+
+            return blogDTOs;
         }
 
-        public Task<BlogDTO> GetBlogById(int id)
+        public async Task<BlogDTO> GetBlogById(int id)
         {
-            throw new NotImplementedException();
+            var blog = await appDbContext.Blogs.FindAsync(id);
+
+            if (blog != null)
+                return MapperlyMapper.BlogToBlogDTO(blog);
+
+            throw new KeyNotFoundException($"Could not find Blog with the id {id}");
         }
 
         public Task<List<BlogDTO>> GetBlogsByUserId(string userId)

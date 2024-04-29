@@ -1,5 +1,6 @@
 ﻿using BisleriumBlog.Application.Common;
 using BisleriumBlog.Application.DTOs;
+using BisleriumBlog.Domain.Enums;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
@@ -7,7 +8,7 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
     {
         Task<BlogDTO> AddBlog(BlogDTO blog);
         Task<BlogDTO> UpdateBlog(int blogId, BlogDTO blogForUpdate);
-        Task<List<BlogDTO>> GetAllBlogs(bool sortByPopularity = false);
+        Task<List<BlogDTO>> GetAllBlogs(int? pageNumber, int? pageSize, SortType? sortBy);
         Task<BlogDTO> GetBlogById(int blogId);
         Task<List<BlogDTO>> GetBlogsByUserId(string userId);
         Task<bool> DeleteBlog(int blogId);

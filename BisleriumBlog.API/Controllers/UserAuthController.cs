@@ -43,8 +43,9 @@ namespace BisleriumBlog.API.Controllers
         {
             if (await userAuthRepository.ValidateUser(userForLogin))
             {
-                string token = await userAuthRepository.CreateToken();
-                return Ok(token);
+                var result = await userAuthRepository.CreateToken();
+
+                return Ok(result);
             }
             return BadRequest("Invalid username or password!");
         }
