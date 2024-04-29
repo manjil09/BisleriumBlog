@@ -45,26 +45,18 @@ builder.Services.AddSwaggerGen(swagger =>
     });
 });
 
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "AllowSpecificOrigins",
-        policy =>
-        {
-            policy.WithOrigins("https://localhost:7271/",
-                "http://localhost:3000/");
-        });
+    // React App
+    options.AddPolicy("reactApp", policyBuilder =>
+    {
+        policyBuilder.WithOrigins("http://localhost:3000");
+        policyBuilder.AllowAnyHeader();
+        policyBuilder.AllowAnyMethod();
+        policyBuilder.AllowCredentials();
+    });
 });
-//builder.Services.AddCors(options =>
-//{
-//    // React App
-//    options.AddPolicy("reactApp", policyBuilder =>
-//    {
-//        policyBuilder.WithOrigins("http://localhost:3000");
-//        policyBuilder.AllowAnyHeader();
-//        policyBuilder.AllowAnyMethod();
-//        policyBuilder.AllowCredentials();
-//    });
-//});
 
 var app = builder.Build();
 
@@ -79,8 +71,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("AllowSpecificOrigins");
-
+app.UseCors("reactApp");
 app.MapControllers();
 
 app.Run();
