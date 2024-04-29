@@ -7,7 +7,7 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
     public interface IBlogRepository
     {
         Task<BlogDTO> AddBlog(BlogDTO blog);
-        Task<BlogDTO> UpdateBlog(int blogId, BlogDTO blogForUpdate);
+        Task<BlogDTO> UpdateBlog(int blogId, BlogDTO updatedBlog);
         Task<List<BlogDTO>> GetAllBlogs(int? pageNumber, int? pageSize, SortType? sortBy);
         Task<BlogDTO> GetBlogById(int blogId);
         Task<List<BlogDTO>> GetBlogsByUserId(string userId);

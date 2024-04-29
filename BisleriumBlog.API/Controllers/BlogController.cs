@@ -19,7 +19,7 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [Authorize(Roles = "User")]
-        [HttpPost]
+        [HttpPost("add")]
         public async Task<IActionResult> AddBlog(BlogDTO blog)
         {
             var data = await blogRepository.AddBlog(blog);
@@ -27,7 +27,7 @@ namespace BisleriumBlog.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet]
+        [HttpGet("getAll")]
         public async Task<IActionResult> GetAllBlogs(int? pageIndex, int? pageSize, string sortBy = "random")
         {
             var sortByEnum = Enum.TryParse(sortBy, true, out SortType sortByValue) ? sortByValue : SortType.Recency;
@@ -56,7 +56,7 @@ namespace BisleriumBlog.API.Controllers
             });
         }
 
-        [HttpGet]
+        [HttpGet("getById/{blogId}")]
         public async Task<IActionResult> GetBlogById(int blogId)
         {
             try
@@ -66,8 +66,46 @@ namespace BisleriumBlog.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new Response<List<BlogDTO>> { IsSuccess = false, Message = ex.Message });
+                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
             }
+        }
+
+        [HttpGet("getByUserId/{userId}")]
+        public async Task<IActionResult> GetBlogsByUserId(string userId)
+        {
+            try
+            {
+                var userBlogs = await blogRepository.GetBlogsByUserId(userId);
+                return Ok(new Response<List<BlogDTO>> { IsSuccess = true, Message = "Blog fetch for the user successful.", Result = userBlogs });
+            }
+            catch(Exception ex)
+            {
+                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
+            }
+        }
+
+        [HttpPut("update/{blogId}")]
+        public async Task<IActionResult> UpdateBlog(int blogId, BlogDTO updatedBlog)
+        {
+            try
+            {
+                var result = await blogRepository.UpdateBlog(blogId, updatedBlog);
+                return Ok(new Response<BlogDTO> { IsSuccess = true, Message = "Blog updated succesfully.", Result = result });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
+            }
+        }
+
+        [HttpDelete("delete/{blogId}")]
+        public async Task<IActionResult> DeleteBlog(int blogId)
+        {
+            var success = await blogRepository.DeleteBlog(blogId);
+            if (success)
+                return Ok(new Response<bool> { IsSuccess = true, Message = "Blog deleted succesfully." });
+
+            return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find Blog with the id {blogId}" });
         }
     }
 }

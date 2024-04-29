@@ -20,16 +20,16 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<BlogDTO> AddBlog(BlogDTO blog)
         {
-            //var newBlog = new Blog()
-            //{
-            //    Title = blog.Title,
-            //    Body = blog.Body,
-            //    Image = blog.Image,
-            //    UserId = blog.UserId,
-            //    CreatedAt = DateTime.Now,
-            //    UpdatedAt = DateTime.Now,
-            //};
-            var newBlog = MapperlyMapper.BlogDTOToBlog(blog);
+            var newBlog = new Blog()
+            {
+                Title = blog.Title,
+                Body = blog.Body,
+                Image = blog.Image,
+                UserId = blog.UserId,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+            };
+            //var newBlog = MapperlyMapper.BlogDTOToBlog(blog);
 
             await appDbContext.Blogs.AddAsync(newBlog);
             await appDbContext.SaveChangesAsync();
@@ -85,18 +85,32 @@ namespace BisleriumBlog.Infrastructure.Repositories
             throw new KeyNotFoundException($"Could not find Blog with the id {id}");
         }
 
-        public Task<List<BlogDTO>> GetBlogsByUserId(string userId)
+        public async Task<List<BlogDTO>> GetBlogsByUserId(string userId)
         {
-            throw new NotImplementedException();
+            var blogs = await appDbContext.Blogs.Where(x => x.UserId == userId).ToListAsync();
+            if (blogs != null)
+            {
+                var blogDTOs = blogs.Select(MapperlyMapper.BlogToBlogDTO).ToList();
+                return blogDTOs;
+            }
+            throw new Exception("The user has not created any blogs.");
         }
 
         public async Task<BlogDTO> UpdateBlog(int blogId, BlogDTO updatedBlog)
         {
             var blogForUpdate = await appDbContext.Blogs.FindAsync(blogId);
-            if (blogForUpdate != null) { }
+            if (blogForUpdate != null) { 
+                blogForUpdate.Title = updatedBlog.Title;
+                blogForUpdate.Body = updatedBlog.Body;
+                blogForUpdate.Image = updatedBlog.Image;
+                blogForUpdate.UpdatedAt = DateTime.Now;
 
-            throw new NotImplementedException();
+                await appDbContext.SaveChangesAsync();
 
+                return MapperlyMapper.BlogToBlogDTO(blogForUpdate);
+            }
+
+            throw new KeyNotFoundException($"Could not find Blog with the id {blogId}");
         }
     }
 }
