@@ -1,5 +1,4 @@
-﻿using BisleriumBlog.Application.Common;
-using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Infrastructure.Data;
@@ -41,13 +40,20 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return result;
         }
 
-        public Task<bool> DeleteBlog(int blogId)
+        public async Task<bool> DeleteBlog(int blogId)
         {
-            throw new NotImplementedException();
+            var blogToDelete = await appDbContext.Blogs.FindAsync(blogId);
+            if (blogToDelete == null)
+                return false;
+
+            appDbContext.Blogs.Remove(blogToDelete);
+            await appDbContext.SaveChangesAsync();
+            return true;
         }
 
         public Task<List<BlogDTO>> GetAllBlogs(bool sortByPopularity = false)
         {
+
             throw new NotImplementedException();
         }
 
