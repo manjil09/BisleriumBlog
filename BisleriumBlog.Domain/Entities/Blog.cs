@@ -11,8 +11,10 @@ namespace BisleriumBlog.Domain.Entities
         public string Body { get; set; }
         public string Image { get; set; }
         public string UserId { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public List<Comment> Comments{ get; set; } //referencing one to many relation with comment entity
         public List<BlogReaction> Reactions { get; set; } //referencing one to many relation with blogReaction entity
+        public List<BlogHistory> History { get; set; } //referencing one to many relation with blogReaction entity
 
         //pending reference to user table 
     }

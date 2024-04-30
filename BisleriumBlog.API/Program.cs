@@ -45,15 +45,6 @@ builder.Services.AddSwaggerGen(swagger =>
     });
 });
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy(name: "reactApp",
-//        policy =>
-//        {
-//            policy.WithOrigins("https://localhost:7271/",
-//                "http://localhost:5208/");
-//        });
-//});
 builder.Services.AddCors(options =>
 {
     // React App
