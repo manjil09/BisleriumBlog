@@ -43,19 +43,21 @@ namespace BisleriumBlog.Infrastructure.Repositories
             if (blogToDelete == null)
                 return false;
 
-            appDbContext.Blogs.Remove(blogToDelete);
+            blogToDelete.IsDeleted = true;
+
+            await AddToBlogHistory(blogToDelete);
             await appDbContext.SaveChangesAsync();
             return true;
         }
 
         public async Task<List<BlogDTO>> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Random)
         {
-            IQueryable<Blog> blogQuery = appDbContext.Blogs;
+            IQueryable<Blog> blogQuery = appDbContext.Blogs.Where(x => !x.IsDeleted);
             
             switch (sortBy)
             {
                 case SortType.Recency:
-                    blogQuery = blogQuery.OrderByDescending(x => x.CreatedAt); // To sort by descending creation date
+                    blogQuery = blogQuery.OrderByDescending(x => x.UpdatedAt); // To sort by descending creation date
                     break;
                 case SortType.Popularity:
 
@@ -77,9 +79,9 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<BlogDTO> GetBlogById(int id)
         {
-            var blog = await appDbContext.Blogs.FindAsync(id);
+            var blog = await appDbContext.Blogs.Where(x => x.Id == id && !x.IsDeleted).SingleOrDefaultAsync();
 
-            if (blog != null)
+            if (blog != null && !blog.IsDeleted)
                 return MapperlyMapper.BlogToBlogDTO(blog);
 
             throw new KeyNotFoundException($"Could not find Blog with the id {id}");
@@ -87,7 +89,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<List<BlogDTO>> GetBlogsByUserId(string userId)
         {
-            var blogs = await appDbContext.Blogs.Where(x => x.UserId == userId).ToListAsync();
+            var blogs = await appDbContext.Blogs.Where(x => x.UserId == userId && !x.IsDeleted).ToListAsync();
             if (blogs != null)
             {
                 var blogDTOs = blogs.Select(MapperlyMapper.BlogToBlogDTO).ToList();
@@ -98,8 +100,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<BlogDTO> UpdateBlog(int blogId, BlogDTO updatedBlog)
         {
-            var blogForUpdate = await appDbContext.Blogs.FindAsync(blogId);
+            var blogForUpdate = await appDbContext.Blogs.Where(x => x.Id == blogId && !x.IsDeleted).SingleOrDefaultAsync();
             if (blogForUpdate != null) { 
+                await AddToBlogHistory(blogForUpdate);
+
                 blogForUpdate.Title = updatedBlog.Title;
                 blogForUpdate.Body = updatedBlog.Body;
                 blogForUpdate.Image = updatedBlog.Image;
@@ -111,6 +115,14 @@ namespace BisleriumBlog.Infrastructure.Repositories
             }
 
             throw new KeyNotFoundException($"Could not find Blog with the id {blogId}");
+        }
+
+        public async Task AddToBlogHistory(Blog blog)
+        {
+            var blogHistory = MapperlyMapper.BlogToBlogHistory(blog);
+            blogHistory.CreatedAt = DateTime.Now;
+
+            await appDbContext.BlogHistory.AddAsync(blogHistory);
         }
     }
 }
