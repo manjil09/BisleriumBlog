@@ -50,10 +50,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<List<BlogDTO>> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Random)
+        public async Task<(int, List<BlogDTO>)> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Random)
         {
             IQueryable<Blog> blogQuery = appDbContext.Blogs.Where(x => !x.IsDeleted);
-            
+
             switch (sortBy)
             {
                 case SortType.Recency:
@@ -71,10 +71,11 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
             //var blogs = await blogQuery.ToListAsync();
             var paginatedBlogs = await PaginatedList<Blog>.CreateAsync(blogQuery, pageIndex ?? 1, pageSize ?? 10);
+            int totalPages = paginatedBlogs.TotalPages;
 
             var blogDTOs = paginatedBlogs.Select(MapperlyMapper.BlogToBlogDTO).ToList();
 
-            return blogDTOs;
+            return (totalPages, blogDTOs);
         }
 
         public async Task<BlogDTO> GetBlogById(int id)
@@ -101,7 +102,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
         public async Task<BlogDTO> UpdateBlog(int blogId, BlogDTO updatedBlog)
         {
             var blogForUpdate = await appDbContext.Blogs.Where(x => x.Id == blogId && !x.IsDeleted).SingleOrDefaultAsync();
-            if (blogForUpdate != null) { 
+            if (blogForUpdate != null)
+            {
                 await AddToBlogHistory(blogForUpdate);
 
                 blogForUpdate.Title = updatedBlog.Title;

@@ -4,8 +4,6 @@ using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 
 namespace BisleriumBlog.API.Controllers
 {
@@ -40,7 +38,7 @@ namespace BisleriumBlog.API.Controllers
                     Message = "Page index and page size must be greater than 0."
                 });
 
-            var blogs = await blogRepository.GetAllBlogs(pageIndex, pageSize, sortByEnum);
+            var (totalPages, blogs) = await blogRepository.GetAllBlogs(pageIndex, pageSize, sortByEnum);
 
             if (blogs == null)
                 return NotFound(new Response<string>
@@ -49,12 +47,16 @@ namespace BisleriumBlog.API.Controllers
                     Message = "Couldn't fetch any Blogs."
                 });
 
-            return Ok(new Response<List<BlogDTO>>
+            var response = new Response<dynamic>
             {
                 IsSuccess = true,
                 Message = "Blog creation successful.",
-                Result = blogs
-            });
+                Result = new { TotalPages = totalPages, Blogs = blogs }
+            };
+
+            Response.Headers.Append("X-Total-Pages", totalPages.ToString());
+
+            return Ok(response);
         }
 
         [HttpGet("getById/{blogId}")]
@@ -79,7 +81,7 @@ namespace BisleriumBlog.API.Controllers
                 var userBlogs = await blogRepository.GetBlogsByUserId(userId);
                 return Ok(new Response<List<BlogDTO>> { IsSuccess = true, Message = "Blog fetch for the user successful.", Result = userBlogs });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
             }

@@ -1,6 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace BisleriumBlog.Application.Common
+﻿namespace BisleriumBlog.Application.Common
 {
     public class Response<T>
     {
