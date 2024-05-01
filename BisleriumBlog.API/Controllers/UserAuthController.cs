@@ -11,16 +11,16 @@ namespace BisleriumBlog.API.Controllers
     [ApiController]
     public class UserAuthController : ControllerBase
     {
-        private readonly IUserAuthRepository userAuthRepository;
+        private readonly IUserAuthRepository _userAuthRepository;
         public UserAuthController(IUserAuthRepository userAuthRepository)
         {
-            this.userAuthRepository = userAuthRepository;
+            this._userAuthRepository = userAuthRepository;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDTO userForRegister)
         {
-            var result = await userAuthRepository.Register(userForRegister);
+            var result = await _userAuthRepository.Register(userForRegister);
 
             if (!result.IsSuccess)
                 return BadRequest(result.Message);
@@ -31,7 +31,7 @@ namespace BisleriumBlog.API.Controllers
         [HttpPost("registerAdmin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] UserRegisterDTO userForRegister)
         {
-            var result = await userAuthRepository.Register(userForRegister, UserRole.Admin);
+            var result = await _userAuthRepository.Register(userForRegister, UserRole.Admin);
 
             if (!result.IsSuccess)
                 return BadRequest(result.Message);
@@ -41,9 +41,9 @@ namespace BisleriumBlog.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO userForLogin)
         {
-            if (await userAuthRepository.ValidateUser(userForLogin))
+            if (await _userAuthRepository.ValidateUser(userForLogin))
             {
-                var result = await userAuthRepository.CreateToken();
+                var result = await _userAuthRepository.CreateToken();
 
                 return Ok(result);
             }

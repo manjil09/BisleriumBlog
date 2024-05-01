@@ -11,17 +11,17 @@ namespace BisleriumBlog.API.Controllers
     [ApiController]
     public class BlogController : ControllerBase
     {
-        private readonly IBlogRepository blogRepository;
+        private readonly IBlogRepository _blogRepository;
         public BlogController(IBlogRepository blogRepository)
         {
-            this.blogRepository = blogRepository;
+            this._blogRepository = blogRepository;
         }
 
         [Authorize(Roles = "User")]
         [HttpPost("add")]
         public async Task<IActionResult> AddBlog(BlogCreateDTO blog)
         {
-            var data = await blogRepository.AddBlog(blog);
+            var data = await _blogRepository.AddBlog(blog);
             var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog creation successful.", Result = data };
             return Ok(response);
         }
@@ -38,7 +38,7 @@ namespace BisleriumBlog.API.Controllers
                     Message = "Page index and page size must be greater than 0."
                 });
 
-            var (totalPages, blogs) = await blogRepository.GetAllBlogs(pageIndex, pageSize, sortByEnum);
+            var (totalPages, blogs) = await _blogRepository.GetAllBlogs(pageIndex, pageSize, sortByEnum);
 
             if (blogs == null)
                 return NotFound(new Response<string>
@@ -64,7 +64,7 @@ namespace BisleriumBlog.API.Controllers
         {
             try
             {
-                var blog = await blogRepository.GetBlogById(blogId);
+                var blog = await _blogRepository.GetBlogById(blogId);
                 return Ok(new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog fetch successful.", Result = blog });
             }
             catch (KeyNotFoundException ex)
@@ -78,7 +78,7 @@ namespace BisleriumBlog.API.Controllers
         {
             try
             {
-                var userBlogs = await blogRepository.GetBlogsByUserId(userId);
+                var userBlogs = await _blogRepository.GetBlogsByUserId(userId);
                 return Ok(new Response<List<BlogResponseDTO>> { IsSuccess = true, Message = "Blog fetch for the user successful.", Result = userBlogs });
             }
             catch (Exception ex)
@@ -93,7 +93,7 @@ namespace BisleriumBlog.API.Controllers
         {
             try
             {
-                var result = await blogRepository.UpdateBlog(blogId, updatedBlog);
+                var result = await _blogRepository.UpdateBlog(blogId, updatedBlog);
                 return Ok(new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog updated succesfully.", Result = result });
             }
             catch (KeyNotFoundException ex)
@@ -105,7 +105,7 @@ namespace BisleriumBlog.API.Controllers
         [HttpDelete("delete/{blogId}")]
         public async Task<IActionResult> DeleteBlog(int blogId)
         {
-            var success = await blogRepository.DeleteBlog(blogId);
+            var success = await _blogRepository.DeleteBlog(blogId);
             if (success)
                 return Ok(new Response<bool> { IsSuccess = true, Message = "Blog deleted succesfully." });
 

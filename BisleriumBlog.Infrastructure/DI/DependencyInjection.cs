@@ -32,6 +32,7 @@ namespace BisleriumBlog.Infrastructure.DI
                 .AddDefaultTokenProviders();
 
             services.AddTransient<IBlogRepository, BlogRepository>();
+            services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddTransient<IUserAuthRepository, UserAuthRepository>();
 
             return services;

@@ -6,10 +6,10 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
     public interface ICommentRepository
     {
         Task<CommentResponseDTO> AddComment(CommentCreateDTO comment);
-        Task<CommentResponseDTO> UpdateComment(int commentId, CommentCreateDTO blogForUpdate);
-        Task<(int, List<CommentResponseDTO>)> GetCommentsByBlogId(int blogId, int? pageNumber, int? pageSize, SortType? sortBy);
+        Task<CommentResponseDTO> UpdateComment(int commentId, CommentCreateDTO updatedComment);
+        Task<(int, List<CommentResponseDTO>)> GetCommentsByBlogId(int blogId, int? pageIndex, int? pageSize, SortType? sortBy);
         Task<CommentResponseDTO> GetCommentById(int commentId);
-        Task<List<CommentResponseDTO>> GetCommentsByUserId(string userId);
+        Task<CommentResponseDTO> GetCommentByUserIdAndBlogId(string userId, int blogId);
         Task<bool> DeleteComment(int commentId);
     }
 }

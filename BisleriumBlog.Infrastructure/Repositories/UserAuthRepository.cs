@@ -2,7 +2,6 @@
 using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
-using BisleriumBlog.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -14,19 +13,19 @@ namespace BisleriumBlog.Infrastructure.Repositories
 {
     public class UserAuthRepository : IUserAuthRepository
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly IConfiguration configuration;
-        private IdentityUser? user;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
+        private IdentityUser? _user;
 
         public UserAuthRepository(UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
-            this.userManager = userManager;
-            this.configuration = configuration;
+            this._userManager = userManager;
+            this._configuration = configuration;
         }
 
         public async Task<Response<string>> Register(UserRegisterDTO userForRegister, UserRole role = UserRole.User)
         {
-            var existingUser = await userManager.FindByNameAsync(userForRegister.UserName);
+            var existingUser = await _userManager.FindByNameAsync(userForRegister.UserName);
             if (existingUser != null)
                 return new Response<string>() { IsSuccess = false, Message = "User name already exists!" };
 
@@ -36,17 +35,17 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 Email = userForRegister.UserEmail,
             };
 
-            var result = await userManager.CreateAsync(user, userForRegister.Password);
+            var result = await _userManager.CreateAsync(user, userForRegister.Password);
             if (!result.Succeeded)
                 return new Response<string>() { IsSuccess = false, Message = "Failed to register user! " + result.Errors.FirstOrDefault()?.Description ?? "Please enter the details again." };
 
             try
             {
-                var addToRoleResult = await userManager.AddToRoleAsync(user, role.ToString());
+                var addToRoleResult = await _userManager.AddToRoleAsync(user, role.ToString());
             }
             catch (InvalidOperationException)
             {
-                await userManager.DeleteAsync(user);
+                await _userManager.DeleteAsync(user);
                 return new Response<string>() { IsSuccess = false, Message = "Failed to assign a role to the user!" };
             }
 
@@ -55,8 +54,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<bool> ValidateUser(UserLoginDTO userForLogin)
         {
-            user = await userManager.FindByNameAsync(userForLogin.UserName);
-            if (user != null && await userManager.CheckPasswordAsync(user, userForLogin.Password))
+            _user = await _userManager.FindByNameAsync(userForLogin.UserName);
+            if (_user != null && await _userManager.CheckPasswordAsync(_user, userForLogin.Password))
                 return true;
             return false;
         }
@@ -77,7 +76,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         private SigningCredentials GetSigningCredentials()
         {
-            var jwtConfig = configuration.GetSection("JwtConfig");
+            var jwtConfig = _configuration.GetSection("JwtConfig");
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig["SecretKey"]!));
 
             return new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -87,10 +86,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier, user.Id)
+                new Claim(ClaimTypes.Name, _user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, _user.Id)
             };
-            var roles = await userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(_user);
 
             foreach (var role in roles)
             {
@@ -102,7 +101,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
         {
-            var jwtSettings = configuration.GetSection("JwtConfig");
+            var jwtSettings = _configuration.GetSection("JwtConfig");
             var tokenOptions = new JwtSecurityToken
             (
             issuer: jwtSettings["Issuer"],
