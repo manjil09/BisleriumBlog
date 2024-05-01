@@ -27,7 +27,7 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [HttpGet("getAll")]
-        public async Task<IActionResult> GetAllBlogs(int? pageIndex, int? pageSize, string sortBy = "random")
+        public async Task<IActionResult> GetAllBlogs(int? pageIndex, int? pageSize, string sortBy = "recency")
         {
             var sortByEnum = Enum.TryParse(sortBy, true, out SortType sortByValue) ? sortByValue : SortType.Recency;
 

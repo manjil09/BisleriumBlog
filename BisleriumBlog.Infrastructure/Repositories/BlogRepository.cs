@@ -50,22 +50,22 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<(int, List<BlogDTO>)> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Random)
+        public async Task<(int, List<BlogDTO>)> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Recency)
         {
             IQueryable<Blog> blogQuery = appDbContext.Blogs.Where(x => !x.IsDeleted);
 
             switch (sortBy)
             {
-                case SortType.Recency:
-                    blogQuery = blogQuery.OrderByDescending(x => x.UpdatedAt); // To sort by descending creation date
-                    break;
                 case SortType.Popularity:
 
                     throw new NotImplementedException();
                     break;
                 case SortType.Random:
-                default:
                     blogQuery = blogQuery.OrderBy(x => Guid.NewGuid()); // To sort randomly
+                    break;
+                case SortType.Recency:
+                default:
+                    blogQuery = blogQuery.OrderByDescending(x => x.UpdatedAt); // To sort by descending creation date
                     break;
             }
 
