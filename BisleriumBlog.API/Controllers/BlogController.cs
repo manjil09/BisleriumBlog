@@ -19,10 +19,10 @@ namespace BisleriumBlog.API.Controllers
 
         [Authorize(Roles = "User")]
         [HttpPost("add")]
-        public async Task<IActionResult> AddBlog(BlogDTO blog)
+        public async Task<IActionResult> AddBlog(BlogCreateDTO blog)
         {
             var data = await blogRepository.AddBlog(blog);
-            var response = new Response<BlogDTO> { IsSuccess = true, Message = "Blog creation successful.", Result = data };
+            var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog creation successful.", Result = data };
             return Ok(response);
         }
 
@@ -65,7 +65,7 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var blog = await blogRepository.GetBlogById(blogId);
-                return Ok(new Response<BlogDTO> { IsSuccess = true, Message = "Blog fetch successful.", Result = blog });
+                return Ok(new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog fetch successful.", Result = blog });
             }
             catch (KeyNotFoundException ex)
             {
@@ -79,7 +79,7 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var userBlogs = await blogRepository.GetBlogsByUserId(userId);
-                return Ok(new Response<List<BlogDTO>> { IsSuccess = true, Message = "Blog fetch for the user successful.", Result = userBlogs });
+                return Ok(new Response<List<BlogResponseDTO>> { IsSuccess = true, Message = "Blog fetch for the user successful.", Result = userBlogs });
             }
             catch (Exception ex)
             {
@@ -87,13 +87,14 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
+
         [HttpPut("update/{blogId}")]
-        public async Task<IActionResult> UpdateBlog(int blogId, BlogDTO updatedBlog)
+        public async Task<IActionResult> UpdateBlog(int blogId, BlogCreateDTO updatedBlog)
         {
             try
             {
                 var result = await blogRepository.UpdateBlog(blogId, updatedBlog);
-                return Ok(new Response<BlogDTO> { IsSuccess = true, Message = "Blog updated succesfully.", Result = result });
+                return Ok(new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog updated succesfully.", Result = result });
             }
             catch (KeyNotFoundException ex)
             {

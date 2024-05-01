@@ -18,7 +18,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             this.appDbContext = appDbContext;
         }
 
-        public async Task<BlogDTO> AddBlog(BlogDTO blog)
+        public async Task<BlogResponseDTO> AddBlog(BlogCreateDTO blog)
         {
             var newBlog = new Blog()
             {
@@ -34,7 +34,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             await appDbContext.Blogs.AddAsync(newBlog);
             await appDbContext.SaveChangesAsync();
 
-            return blog;
+            return MapperlyMapper.BlogToBlogResponseDTO(newBlog);
         }
 
         public async Task<bool> DeleteBlog(int blogId)
@@ -50,7 +50,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<(int, List<BlogDTO>)> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Recency)
+        public async Task<(int, List<BlogResponseDTO>)> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Recency)
         {
             IQueryable<Blog> blogQuery = appDbContext.Blogs.Where(x => !x.IsDeleted);
 
@@ -73,33 +73,33 @@ namespace BisleriumBlog.Infrastructure.Repositories
             var paginatedBlogs = await PaginatedList<Blog>.CreateAsync(blogQuery, pageIndex ?? 1, pageSize ?? 10);
             int totalPages = paginatedBlogs.TotalPages;
 
-            var blogDTOs = paginatedBlogs.Select(MapperlyMapper.BlogToBlogDTO).ToList();
+            var blogDTOs = paginatedBlogs.Select(MapperlyMapper.BlogToBlogResponseDTO).ToList();
 
             return (totalPages, blogDTOs);
         }
 
-        public async Task<BlogDTO> GetBlogById(int id)
+        public async Task<BlogResponseDTO> GetBlogById(int id)
         {
             var blog = await appDbContext.Blogs.Where(x => x.Id == id && !x.IsDeleted).SingleOrDefaultAsync();
 
             if (blog != null && !blog.IsDeleted)
-                return MapperlyMapper.BlogToBlogDTO(blog);
+                return MapperlyMapper.BlogToBlogResponseDTO(blog);
 
             throw new KeyNotFoundException($"Could not find Blog with the id {id}");
         }
 
-        public async Task<List<BlogDTO>> GetBlogsByUserId(string userId)
+        public async Task<List<BlogResponseDTO>> GetBlogsByUserId(string userId)
         {
             var blogs = await appDbContext.Blogs.Where(x => x.UserId == userId && !x.IsDeleted).ToListAsync();
             if (blogs != null)
             {
-                var blogDTOs = blogs.Select(MapperlyMapper.BlogToBlogDTO).ToList();
+                var blogDTOs = blogs.Select(MapperlyMapper.BlogToBlogResponseDTO).ToList();
                 return blogDTOs;
             }
             throw new Exception("The user has not created any blogs.");
         }
 
-        public async Task<BlogDTO> UpdateBlog(int blogId, BlogDTO updatedBlog)
+        public async Task<BlogResponseDTO> UpdateBlog(int blogId, BlogCreateDTO updatedBlog)
         {
             var blogForUpdate = await appDbContext.Blogs.Where(x => x.Id == blogId && !x.IsDeleted).SingleOrDefaultAsync();
             if (blogForUpdate != null)
@@ -113,7 +113,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
                 await appDbContext.SaveChangesAsync();
 
-                return MapperlyMapper.BlogToBlogDTO(blogForUpdate);
+                return MapperlyMapper.BlogToBlogResponseDTO(blogForUpdate);
             }
 
             throw new KeyNotFoundException($"Could not find Blog with the id {blogId}");

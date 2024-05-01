@@ -87,7 +87,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName)
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
             var roles = await userManager.GetRolesAsync(user);
 

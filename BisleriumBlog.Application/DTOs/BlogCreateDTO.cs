@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace BisleriumBlog.Application.DTOs
 {
-    public class BlogDTO
+    public class BlogCreateDTO
     {
         public string Title { get; set; }
         public string Body { get; set; }
         public string Image { get; set; }
         public string UserId { get; set; }
-        public DateTime UpdatedAt { get; set; }
     }
 }
