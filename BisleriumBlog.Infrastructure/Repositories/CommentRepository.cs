@@ -2,7 +2,6 @@
 using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
-using BisleriumBlog.Domain.Enums;
 using BisleriumBlog.Infrastructure.Data;
 using BisleriumBlog.Infrastructure.Mapper;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +54,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             throw new KeyNotFoundException($"Could not find Comment with the id {commentId}");
         }
 
-        public async Task<(int, List<CommentResponseDTO>)> GetCommentsByBlogId(int blogId, int? pageIndex, int? pageSize, SortType? sortBy)
+        public async Task<(int, List<CommentResponseDTO>)> GetCommentsByBlogId(int blogId, int? pageIndex, int? pageSize)
         {
             IQueryable<Comment> commentQuery = _appDbContext.Comments
                 .Where(x => x.BlogId == blogId && !x.IsDeleted)
@@ -73,7 +72,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
         {
             var comment = await _appDbContext.Comments.Where(x => x.UserId == userId && x.BlogId == blogId && !x.IsDeleted).SingleOrDefaultAsync();
 
-            if (comment != null && !comment.IsDeleted)
+            if (comment != null)
                 return MapperlyMapper.CommentToCommentResponseDTO(comment);
 
             throw new KeyNotFoundException($"Could not find Comment with the user id {userId} and blog id {blogId}");

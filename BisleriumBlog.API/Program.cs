@@ -1,6 +1,5 @@
 using BisleriumBlog.Infrastructure.DI;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 

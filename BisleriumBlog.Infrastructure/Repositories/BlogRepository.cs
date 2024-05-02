@@ -82,7 +82,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
         {
             var blog = await _appDbContext.Blogs.Where(x => x.Id == id && !x.IsDeleted).SingleOrDefaultAsync();
 
-            if (blog != null && !blog.IsDeleted)
+            if (blog != null)
                 return MapperlyMapper.BlogToBlogResponseDTO(blog);
 
             throw new KeyNotFoundException($"Could not find Blog with the id {id}");

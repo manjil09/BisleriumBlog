@@ -22,7 +22,7 @@ namespace BisleriumBlog.API.Controllers
         public async Task<IActionResult> AddBlog(BlogCreateDTO blog)
         {
             var data = await _blogRepository.AddBlog(blog);
-            var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog creation successful.", Result = data };
+            var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Your blog has been posted.", Result = data };
             return Ok(response);
         }
 
@@ -47,10 +47,17 @@ namespace BisleriumBlog.API.Controllers
                     Message = "Couldn't fetch any Blogs."
                 });
 
+            if (totalPages == 0)
+                return Ok(new Response<string>
+                {
+                    IsSuccess = true,
+                    Message = "There are no blogs posted yet."
+                });
+
             var response = new Response<dynamic>
             {
                 IsSuccess = true,
-                Message = "Blog creation successful.",
+                Message = "Blogs retrieved successfully.",
                 Result = new { TotalPages = totalPages, Blogs = blogs }
             };
 
