@@ -28,7 +28,7 @@ namespace BisleriumBlog.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("getBlogComments")]
+        [HttpGet("getComments/{blogId}")]
         public async Task<IActionResult> GetCommentsByBlogId(int blogId, int? pageIndex, int? pageSize)
         {
             if (pageIndex < 1 || pageSize < 1)
@@ -65,18 +65,43 @@ namespace BisleriumBlog.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("get")]
-        public async Task<IActionResult> GetBlogsByUserId(string userId, int blogId)
+        [Authorize(Roles = "User")]
+        [HttpGet("getUerComments/{blogId}/{userId}")]
+        public async Task<IActionResult> GetCommentByUserIdAndBlogId(string userId, int blogId)
         {
             try
             {
                 var userComent = await _commentRepository.GetCommentByUserIdAndBlogId(userId,blogId);
-                return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "Uer comment o the blog fetched successfully.", Result = userComent });
+                return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "Uer comment on the blog fetched successfully.", Result = userComent });
             }
             catch (Exception ex)
             {
                 return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
             }
+        }
+
+        [HttpPut("update/{commentId}")]
+        public async Task<IActionResult> UpdateComment(int commentId, CommentCreateDTO updatedComment)
+        {
+            try
+            {
+                var result = await _commentRepository.UpdateComment(commentId, updatedComment);
+                return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "Comment updated succesfully.", Result = result });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
+            }
+        }
+
+        [HttpDelete("delete/{commentId}")]
+        public async Task<IActionResult> DeleteBlog(int commentId)
+        {
+            var success = await _commentRepository.DeleteComment(commentId);
+            if (success)
+                return Ok(new Response<bool> { IsSuccess = true, Message = "Comment deleted succesfully." });
+
+            return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find Comment with the id {commentId}" });
         }
     }
 }

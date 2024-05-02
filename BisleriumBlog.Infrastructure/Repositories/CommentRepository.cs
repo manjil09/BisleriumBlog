@@ -75,7 +75,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             if (comment != null)
                 return MapperlyMapper.CommentToCommentResponseDTO(comment);
 
-            throw new KeyNotFoundException($"Could not find Comment with the user id {userId} and blog id {blogId}");
+            throw new KeyNotFoundException($"Current user has not posted any comment on the blog.");
         }
 
         public async Task<CommentResponseDTO> UpdateComment(int commentId, CommentCreateDTO updatedComment)
