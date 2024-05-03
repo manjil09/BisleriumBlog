@@ -3,6 +3,6 @@
     public enum ReactionType
     {
         Upvote,
-        DownVote
+        Downvote
     }
 }

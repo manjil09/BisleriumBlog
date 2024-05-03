@@ -8,18 +8,19 @@ namespace BisleriumBlog.Infrastructure.Mapper
     public static partial class MapperlyMapper
     {
         //public static partial BlogCreateDTO BlogToBlogCreateDTO(Blog blog);
-        //public static partial Blog BlogCreateDTOToBlog(BlogCreateDTO blogDto);
-        //public static partial Comment CommentDTOToComment(CommentCreateDTO commentDto);
+        public static partial Blog BlogCreateDTOToBlog(BlogCreateDTO blogDto);
         public static partial BlogResponseDTO BlogToBlogResponseDTO(Blog blog);
-
         [MapperIgnoreTarget(nameof(BlogHistory.Id))]
         [MapProperty(source: nameof(Blog.Id), target: nameof(BlogHistory.BlogId))]
         public static partial BlogHistory BlogToBlogHistory(Blog blog);
 
+        public static partial Comment CommentCreateDTOToComment(CommentCreateDTO commentDto);
         public static partial CommentResponseDTO CommentToCommentResponseDTO(Comment comment);
-
         [MapperIgnoreTarget(nameof(CommentHistory.Id))]
         [MapProperty(source: nameof(Comment.Id), target: nameof(CommentHistory.CommentId))]
         public static partial CommentHistory CommentToCommentHistory(Comment comment);
+
+        public static partial BlogReaction BlogReactionDTOToBlogReaction(BlogReactionDTO blogReactionDto);
+        public static partial BlogReactionDTO BlogReactionToBlogReactionDTO(BlogReaction blogReaction);
     }
 }

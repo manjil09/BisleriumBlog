@@ -6,6 +6,7 @@ using BisleriumBlog.Domain.Enums;
 using BisleriumBlog.Infrastructure.Data;
 using BisleriumBlog.Infrastructure.Mapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BisleriumBlog.Infrastructure.Repositories
 {
@@ -13,23 +14,29 @@ namespace BisleriumBlog.Infrastructure.Repositories
     {
         private readonly AppDbContext _appDbContext;
 
+        private const int UpvoteWeightage = 2;
+        private const int DownvoteWeightage = -1;
+        private const int CommentWeightage = 1;
+
         public BlogRepository(AppDbContext appDbContext)
         {
-            this._appDbContext = appDbContext;
+            _appDbContext = appDbContext;
         }
 
         public async Task<BlogResponseDTO> AddBlog(BlogCreateDTO blog)
         {
-            var newBlog = new Blog()
-            {
-                Title = blog.Title,
-                Body = blog.Body,
-                Image = blog.Image,
-                UserId = blog.UserId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
-            //var newBlog = MapperlyMapper.BlogDTOToBlog(blog);
+            //var newBlog = new Blog()
+            //{
+            //    Title = blog.Title,
+            //    Body = blog.Body,
+            //    Image = blog.Image,
+            //    UserId = blog.UserId,
+            //    CreatedAt = DateTime.Now,
+            //    UpdatedAt = DateTime.Now,
+            //};
+            var newBlog = MapperlyMapper.BlogCreateDTOToBlog(blog);
+            newBlog.CreatedAt = DateTime.Now;
+            newBlog.UpdatedAt = DateTime.Now;
 
             await _appDbContext.Blogs.AddAsync(newBlog);
             await _appDbContext.SaveChangesAsync();
@@ -57,8 +64,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             switch (sortBy)
             {
                 case SortType.Popularity:
-
-                    throw new NotImplementedException();
+                    blogQuery = SortByPopularity(blogQuery);
                     break;
                 case SortType.Random:
                     blogQuery = blogQuery.OrderBy(x => Guid.NewGuid()); // To sort randomly
@@ -90,8 +96,12 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<List<BlogResponseDTO>> GetBlogsByUserId(string userId)
         {
+            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
+            if (!userExists)
+                throw new Exception($"The blog with id {userId} does not exist.");
+
             var blogs = await _appDbContext.Blogs.Where(x => x.UserId == userId && !x.IsDeleted).ToListAsync();
-            if (blogs != null)
+            if (!blogs.IsNullOrEmpty())
             {
                 var blogDTOs = blogs.Select(MapperlyMapper.BlogToBlogResponseDTO).ToList();
                 return blogDTOs;
@@ -125,6 +135,23 @@ namespace BisleriumBlog.Infrastructure.Repositories
             blogHistory.CreatedAt = DateTime.Now;
 
             await _appDbContext.BlogHistory.AddAsync(blogHistory);
+        }
+        public IQueryable<Blog> SortByPopularity(IQueryable<Blog> blogQuery)
+        {
+            blogQuery = blogQuery.Include(x => x.Reactions)
+                .Include(x => x.Comments)
+                .OrderByDescending(x=>
+                x.Reactions.Count(r=>r.Type == ReactionType.Upvote)*UpvoteWeightage + 
+                x.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
+                x.Comments.Count(c=>!c.IsDeleted) * CommentWeightage);
+
+            //int upvotes = blogQuery.Count(r => r.Reactions.Type == ReactionType.Upvote);
+            //int downvotes = blogQuery.Reactions.Count(r => r.Type == ReactionType.Downvote);
+            //int comments = blogQuery.Comments.Count;
+
+            //double popularityScore = (UpvoteWeightage * upvotes) +(DownvoteWeightage * downvotes) +(CommentWeightage * comments);
+
+            return blogQuery;
         }
     }
 }

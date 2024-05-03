@@ -7,6 +7,5 @@ namespace BisleriumBlog.Application.DTOs
         public int BlogId { get; set; }
         public string UserId { get; set; }
         public ReactionType Type { get; set; }
-        public DateTime ReactedAt { get; set; }
     }
 }

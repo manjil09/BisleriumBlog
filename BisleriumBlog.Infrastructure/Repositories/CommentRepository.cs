@@ -18,13 +18,9 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<CommentResponseDTO> AddComment(CommentCreateDTO comment)
         {
-            var newComment = new Comment()
-            {
-                Body = comment.Body,
-                UserId = comment.UserId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
+            var newComment = MapperlyMapper.CommentCreateDTOToComment(comment);
+            newComment.CreatedAt = DateTime.Now;
+            newComment.UpdatedAt = DateTime.Now;
 
             await _appDbContext.Comments.AddAsync(newComment);
             await _appDbContext.SaveChangesAsync();
@@ -56,6 +52,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<(int, List<CommentResponseDTO>)> GetCommentsByBlogId(int blogId, int? pageIndex, int? pageSize)
         {
+            bool blogExists = await _appDbContext.Blogs.AnyAsync(x => x.Id == blogId);
+            if (!blogExists)
+                throw new Exception($"The blog with id {blogId} does not exist.");
+
             IQueryable<Comment> commentQuery = _appDbContext.Comments
                 .Where(x => x.BlogId == blogId && !x.IsDeleted)
                 .OrderByDescending(o => o.UpdatedAt);

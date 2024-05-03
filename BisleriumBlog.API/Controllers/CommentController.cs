@@ -37,32 +37,36 @@ namespace BisleriumBlog.API.Controllers
                     IsSuccess = false,
                     Message = "Page index and page size must be greater than 0."
                 });
+            try
+            {
+                var (totalPages, comments) = await _commentRepository.GetCommentsByBlogId(blogId, pageIndex, pageSize);
 
-            var (totalPages, comments) = await _commentRepository.GetCommentsByBlogId(blogId, pageIndex, pageSize);
+                if (comments == null)
+                    return NotFound(new Response<string>
+                    {
+                        IsSuccess = false,
+                        Message = "Couldn't fetch any comments."
+                    });
+                if (totalPages == 0)
+                    return Ok(new Response<string>
+                    {
+                        IsSuccess = true,
+                        Message = "There are currently no comments on this blog."
+                    });
 
-            if (comments == null)
-                return NotFound(new Response<string>
-                {
-                    IsSuccess = false,
-                    Message = "Couldn't fetch any comments."
-                });
-            if (totalPages == 0 )
-                return Ok(new Response<string>
+                var response = new Response<dynamic>
                 {
                     IsSuccess = true,
-                    Message = "There are currently no comments on this blog."
-                });
+                    Message = "Comments retrieved successfully.",
+                    Result = new { TotalPages = totalPages, Comments = comments }
+                };
 
-            var response = new Response<dynamic>
+                return Ok(response);
+            }
+            catch (Exception ex)
             {
-                IsSuccess = true,
-                Message = "Comments retrieved successfully.",
-                Result = new { TotalPages = totalPages, Comments = comments }
-            };
-
-            Response.Headers.Append("X-Total-Pages", totalPages.ToString());
-
-            return Ok(response);
+                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
+            }
         }
 
         [Authorize(Roles = "User")]

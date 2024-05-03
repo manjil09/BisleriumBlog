@@ -1,14 +1,14 @@
-﻿using BisleriumBlog.Application.Common;
-using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.DTOs;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
     public interface IBlogReactionRepository
     {
-        Task<BlogReactionDTO> ToggleUpVote(int blogId, BlogReactionDTO reactionForUpdate);
-        Task<BlogReactionDTO> ToggleDownVote(int blogId, BlogReactionDTO reactionForUpdate);
-        Task<List<BlogReactionDTO>> GetBlogReactionByBlogId(int blogId);
-        Task<BlogReactionDTO> GetBlogReactionByUserIdAndBlogId(string userId);
-        Task<bool> DeleteBlogReaction(int blogReactionId);
+        Task<BlogReactionDTO> AddReaction(BlogReactionDTO blogReaction);
+        Task<BlogReactionDTO> UpdateReaction(int blogId, BlogReactionDTO updatedReaction);
+        Task<bool> DeleteReaction(int blogReactionId);
+        Task<BlogReactionDTO> GetReactionById(int blogReactionId);
+        Task<(int totalUpvotes, int totalDownvotes, List<BlogReactionDTO>)> GetReactionsByBlogId(int blogId);
+        Task<BlogReactionDTO> GetReactionByUserIdAndBlogId(string userId, int blogId);
     }
 }
