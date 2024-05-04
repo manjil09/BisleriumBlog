@@ -12,25 +12,29 @@ namespace BisleriumBlog.API.Controllers
     public class BlogController : ControllerBase
     {
         private readonly IBlogRepository _blogRepository;
-        public BlogController(IBlogRepository blogRepository)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public BlogController(IBlogRepository blogRepository, IWebHostEnvironment webHostEnvironment)
         {
-            this._blogRepository = blogRepository;
+            _blogRepository = blogRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [Authorize(Roles = "User")]
         [HttpPost("add")]
         public async Task<IActionResult> AddBlog(BlogCreateDTO blog)
         {
-            try
-            {
-                var data = await _blogRepository.AddBlog(blog);
+            //try
+            //{
+                var imageUrl = await UploadImage(blog.Image);
+
+                var data = await _blogRepository.AddBlog(blog, imageUrl);
                 var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Your blog has been posted.", Result = data };
                 return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new Response<string> { IsSuccess = false, Message = ex.Message });
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    return BadRequest(new Response<string> { IsSuccess = false, Message = ex.Message });
+            //}
         }
 
         [HttpGet("getAll")]
@@ -107,7 +111,8 @@ namespace BisleriumBlog.API.Controllers
         {
             try
             {
-                var result = await _blogRepository.UpdateBlog(blogId, updatedBlog);
+                var imageUrl = await UploadImage(updatedBlog.Image);
+                var result = await _blogRepository.UpdateBlog(blogId, updatedBlog, imageUrl);
                 return Ok(new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog updated succesfully.", Result = result });
             }
             catch (KeyNotFoundException ex)
@@ -124,6 +129,19 @@ namespace BisleriumBlog.API.Controllers
                 return Ok(new Response<bool> { IsSuccess = true, Message = "Blog deleted succesfully." });
 
             return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find Blog with the id {blogId}" });
+        }
+
+        private async Task<string> UploadImage(IFormFile imageFile)
+        {
+            string fileName = Path.GetRandomFileName() + Path.GetExtension(imageFile.FileName);
+            string path = Path.Combine(_webHostEnvironment.WebRootPath, "Images/Blog", fileName);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("/Images/Blog/", fileName);
         }
     }
 }

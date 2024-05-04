@@ -23,13 +23,14 @@ namespace BisleriumBlog.Infrastructure.Repositories
             _appDbContext = appDbContext;
         }
 
-        public async Task<BlogResponseDTO> AddBlog(BlogCreateDTO blog)
+        public async Task<BlogResponseDTO> AddBlog(BlogCreateDTO blog, string imageUrl)
         {
             bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == blog.UserId);
             if (!userExists)
                 throw new Exception("The user with the provided ID does not exist.");
 
             var newBlog = MapperlyMapper.BlogCreateDTOToBlog(blog);
+            newBlog.ImageUrl = imageUrl;
             newBlog.CreatedAt = DateTime.Now;
             newBlog.UpdatedAt = DateTime.Now;
 
@@ -104,7 +105,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             throw new Exception("The user has not created any blogs.");
         }
 
-        public async Task<BlogResponseDTO> UpdateBlog(int blogId, BlogCreateDTO updatedBlog)
+        public async Task<BlogResponseDTO> UpdateBlog(int blogId, BlogCreateDTO updatedBlog, string imageUrl)
         {
             var blogForUpdate = await _appDbContext.Blogs.Where(x => x.Id == blogId && !x.IsDeleted).SingleOrDefaultAsync();
             if (blogForUpdate != null)
@@ -113,7 +114,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
                 blogForUpdate.Title = updatedBlog.Title;
                 blogForUpdate.Body = updatedBlog.Body;
-                blogForUpdate.Image = updatedBlog.Image;
+                blogForUpdate.ImageUrl = imageUrl;
                 blogForUpdate.UpdatedAt = DateTime.Now;
 
                 await _appDbContext.SaveChangesAsync();
