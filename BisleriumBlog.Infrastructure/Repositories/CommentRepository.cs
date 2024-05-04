@@ -23,6 +23,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             if (!userExists)
                 throw new Exception("The user with the provided ID does not exist.");
 
+
             var newComment = MapperlyMapper.CommentCreateDTOToComment(comment);
             newComment.CreatedAt = DateTime.Now;
             newComment.UpdatedAt = DateTime.Now;
@@ -101,7 +102,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             throw new KeyNotFoundException($"Could not find Comment with the id {commentId}");
         }
 
-        public async Task AddToCommentHistory(Comment comment)
+        private async Task AddToCommentHistory(Comment comment)
         {
             var commentHistory = MapperlyMapper.CommentToCommentHistory(comment);
             commentHistory.CreatedAt = DateTime.Now;

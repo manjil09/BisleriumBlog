@@ -4,6 +4,7 @@ using BisleriumBlog.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BisleriumBlog.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240504183550_BlogIdUserIdMadeUniqueInComment")]
+    partial class BlogIdUserIdMadeUniqueInComment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,12 +118,11 @@ namespace BisleriumBlog.Infrastructure.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BlogId", "UserId")
-                        .IsUnique();
+                    b.HasIndex("BlogId");
 
                     b.ToTable("BlogReactions");
                 });
@@ -208,12 +210,11 @@ namespace BisleriumBlog.Infrastructure.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CommentId", "UserId")
-                        .IsUnique();
+                    b.HasIndex("CommentId");
 
                     b.ToTable("CommentReactions");
                 });
@@ -355,14 +356,14 @@ namespace BisleriumBlog.Infrastructure.Migrations
                         {
                             Id = "36109bb5-c596-4fee-a016-1d8f8c7496cd",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "741dc879-e2b8-4178-ae47-7b051c038e13",
+                            ConcurrencyStamp = "2c5f106c-9d02-41b9-b5cd-4d457b36cc60",
                             Email = "manjil.koju.a@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedUserName = "SPADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEK8L6Cr30tM3sqXS49v1dQN2Yuo942nLYRAXEnMrglPdMNKn3JmBavfcPIV39nJQoQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJplz+W+FmdYXdainQdNvluZXlu8TCt3JTZIlCtUTwJzGUav/Cjnay7yORinCfhnrQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "764e38d8-1133-4cd2-8aaf-40517fef8348",
+                            SecurityStamp = "ca36c1a9-fe3a-41b8-8138-390022fa0c2b",
                             TwoFactorEnabled = false,
                             UserName = "SpAdmin"
                         });

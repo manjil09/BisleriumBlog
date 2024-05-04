@@ -3,6 +3,7 @@ using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace BisleriumBlog.Infrastructure.Data
 {
@@ -23,6 +24,11 @@ namespace BisleriumBlog.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
+            //make sure each user can only have 1 reaction and 1 comment on each blog
+            builder.Entity<Comment>().HasIndex(x => new{x.BlogId,x.UserId}).IsUnique();
+            builder.Entity<BlogReaction>().HasIndex(x => new {x.BlogId, x.UserId }).IsUnique();
+            builder.Entity<CommentReaction>().HasIndex(x => new {x.CommentId, x.UserId }).IsUnique();
+            
             string ADMIN_ID = "36109bb5-c596-4fee-a016-1d8f8c7496cd";
             string ADMIN_ROLE_ID = "3e4007fd-f323-41c5-892a-29e4c50d0f6b";
             string USER_ROLE_ID = "f8ca833b-8b85-41b3-9279-eb99b563326d";

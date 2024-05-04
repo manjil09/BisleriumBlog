@@ -23,18 +23,19 @@ namespace BisleriumBlog.API.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> AddBlog(BlogCreateDTO blog)
         {
-            //try
-            //{
+            try
+            {
                 var imageUrl = await UploadImage(blog.Image);
 
                 var data = await _blogRepository.AddBlog(blog, imageUrl);
                 var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Your blog has been posted.", Result = data };
                 return Ok(response);
-            //}
-            //catch (Exception ex)
-            //{
-            //    return BadRequest(new Response<string> { IsSuccess = false, Message = ex.Message });
-            //}
+            }
+            catch (Exception ex)
+            {
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
+            }
         }
 
         [HttpGet("getAll")]

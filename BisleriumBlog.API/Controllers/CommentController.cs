@@ -33,7 +33,8 @@ namespace BisleriumBlog.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new Response<string> { IsSuccess = false, Message = ex.Message });
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
             }
         }
 
@@ -84,7 +85,7 @@ namespace BisleriumBlog.API.Controllers
         {
             try
             {
-                var userComent = await _commentRepository.GetCommentByUserIdAndBlogId(userId,blogId);
+                var userComent = await _commentRepository.GetCommentByUserIdAndBlogId(userId, blogId);
                 return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "Uer comment on the blog fetched successfully.", Result = userComent });
             }
             catch (Exception ex)
