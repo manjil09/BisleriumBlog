@@ -17,13 +17,20 @@ namespace BisleriumBlog.API.Controllers
             _blogReactionRepository = blogReactionRepository;
         }
 
-        [Authorize(Roles = "User")]
+        //[Authorize(Roles = "User")]
         [HttpPost("add")]
         public async Task<IActionResult> AddBlog(BlogReactionDTO reaction)
         {
-            var data = await _blogReactionRepository.AddReaction(reaction);
-            var response = new Response<BlogReactionDTO> { IsSuccess = true, Message = "Your blog has been posted.", Result = data };
-            return Ok(response);
+            try
+            {
+                var data = await _blogReactionRepository.AddReaction(reaction);
+                var response = new Response<BlogReactionDTO> { IsSuccess = true, Message = "Your blog has been posted.", Result = data };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response<string> { IsSuccess = false, Message = ex.Message });
+            }
         }
 
         [HttpDelete("delete/{blogId}")]

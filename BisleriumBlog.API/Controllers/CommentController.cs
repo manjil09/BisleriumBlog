@@ -6,6 +6,8 @@ using BisleriumBlog.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace BisleriumBlog.API.Controllers
 {
@@ -23,9 +25,16 @@ namespace BisleriumBlog.API.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> AddComment(CommentCreateDTO comment)
         {
-            var data = await _commentRepository.AddComment(comment);
-            var response = new Response<CommentResponseDTO> { IsSuccess = true, Message = "Comment added successfully.", Result = data };
-            return Ok(response);
+            try
+            {
+                var data = await _commentRepository.AddComment(comment);
+                var response = new Response<CommentResponseDTO> { IsSuccess = true, Message = "Comment added successfully.", Result = data };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response<string> { IsSuccess = false, Message = ex.Message });
+            }
         }
 
         [HttpGet("getComments/{blogId}")]

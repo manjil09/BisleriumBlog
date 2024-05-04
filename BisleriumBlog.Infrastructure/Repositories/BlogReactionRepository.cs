@@ -1,5 +1,6 @@
 ﻿using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
+using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Domain.Enums;
 using BisleriumBlog.Infrastructure.Data;
 using BisleriumBlog.Infrastructure.Mapper;
@@ -17,6 +18,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<BlogReactionDTO> AddReaction(BlogReactionDTO blogReaction)
         {
+            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == blogReaction.UserId);
+            if (!userExists)
+                throw new Exception("The user with the provided ID does not exist.");
+
             var newReaction = MapperlyMapper.BlogReactionDTOToBlogReaction(blogReaction);
             newReaction.ReactedAt = DateTime.Now;
 
@@ -49,7 +54,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<(int totalUpvotes, int totalDownvotes, List<BlogReactionDTO>)> GetReactionsByBlogId(int blogId)
         {
-            bool blogExists = await _appDbContext.Blogs.AnyAsync(x=>x.Id == blogId);
+            bool blogExists = await _appDbContext.Blogs.AnyAsync(x=>x.Id == blogId && !x.IsDeleted);
             if (!blogExists)
                 throw new Exception($"The blog with id {blogId} does not exist.");
 

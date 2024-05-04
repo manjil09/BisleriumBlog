@@ -25,15 +25,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<BlogResponseDTO> AddBlog(BlogCreateDTO blog)
         {
-            //var newBlog = new Blog()
-            //{
-            //    Title = blog.Title,
-            //    Body = blog.Body,
-            //    Image = blog.Image,
-            //    UserId = blog.UserId,
-            //    CreatedAt = DateTime.Now,
-            //    UpdatedAt = DateTime.Now,
-            //};
+            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == blog.UserId);
+            if (!userExists)
+                throw new Exception("The user with the provided ID does not exist.");
+
             var newBlog = MapperlyMapper.BlogCreateDTOToBlog(blog);
             newBlog.CreatedAt = DateTime.Now;
             newBlog.UpdatedAt = DateTime.Now;
@@ -98,7 +93,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
         {
             bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
             if (!userExists)
-                throw new Exception($"The blog with id {userId} does not exist.");
+                throw new Exception("The user with the provided ID does not exist.");
 
             var blogs = await _appDbContext.Blogs.Where(x => x.UserId == userId && !x.IsDeleted).ToListAsync();
             if (!blogs.IsNullOrEmpty())
@@ -140,16 +135,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
         {
             blogQuery = blogQuery.Include(x => x.Reactions)
                 .Include(x => x.Comments)
-                .OrderByDescending(x=>
-                x.Reactions.Count(r=>r.Type == ReactionType.Upvote)*UpvoteWeightage + 
+                .OrderByDescending(x =>
+                x.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
                 x.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
-                x.Comments.Count(c=>!c.IsDeleted) * CommentWeightage);
-
-            //int upvotes = blogQuery.Count(r => r.Reactions.Type == ReactionType.Upvote);
-            //int downvotes = blogQuery.Reactions.Count(r => r.Type == ReactionType.Downvote);
-            //int comments = blogQuery.Comments.Count;
-
-            //double popularityScore = (UpvoteWeightage * upvotes) +(DownvoteWeightage * downvotes) +(CommentWeightage * comments);
+                x.Comments.Count(c => !c.IsDeleted) * CommentWeightage);
 
             return blogQuery;
         }

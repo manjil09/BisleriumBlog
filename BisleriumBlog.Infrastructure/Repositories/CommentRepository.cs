@@ -5,6 +5,7 @@ using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Infrastructure.Data;
 using BisleriumBlog.Infrastructure.Mapper;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
 
 namespace BisleriumBlog.Infrastructure.Repositories
 {
@@ -18,6 +19,10 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<CommentResponseDTO> AddComment(CommentCreateDTO comment)
         {
+            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == comment.UserId);
+            if (!userExists)
+                throw new Exception("The user with the provided ID does not exist.");
+
             var newComment = MapperlyMapper.CommentCreateDTOToComment(comment);
             newComment.CreatedAt = DateTime.Now;
             newComment.UpdatedAt = DateTime.Now;
@@ -52,7 +57,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<(int, List<CommentResponseDTO>)> GetCommentsByBlogId(int blogId, int? pageIndex, int? pageSize)
         {
-            bool blogExists = await _appDbContext.Blogs.AnyAsync(x => x.Id == blogId);
+            bool blogExists = await _appDbContext.Blogs.AnyAsync(x => x.Id == blogId && !x.IsDeleted);
             if (!blogExists)
                 throw new Exception($"The blog with id {blogId} does not exist.");
 
