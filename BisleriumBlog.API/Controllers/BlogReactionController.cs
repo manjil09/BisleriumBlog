@@ -113,7 +113,7 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var userReaction = await _blogReactionRepository.GetReactionByUserIdAndBlogId(userId, blogId);
-                return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "User reaction on the blog fetched successfully.", Result = userReaction });
+                return Ok(new Response<BlogReactionDTO> { IsSuccess = true, Message = "User reaction on the blog fetched successfully.", Result = userReaction });
             }
             catch (Exception ex)
             {
