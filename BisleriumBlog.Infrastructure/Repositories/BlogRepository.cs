@@ -87,7 +87,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             if (blog != null)
                 return MapperlyMapper.BlogToBlogResponseDTO(blog);
 
-            throw new KeyNotFoundException($"Could not find Blog with the id {id}");
+            throw new Exception($"Could not find Blog with the id {id}");
         }
 
         public async Task<List<BlogResponseDTO>> GetBlogsByUserId(string userId)

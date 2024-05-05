@@ -4,6 +4,7 @@ using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace BisleriumBlog.API.Controllers
 {
@@ -25,10 +26,19 @@ namespace BisleriumBlog.API.Controllers
         {
             try
             {
-                var imageUrl = await UploadImage(blog.Image);
+                var imageFile = blog.Image;
+                ValidateImageFile(imageFile);
+
+                string fileName = Path.GetRandomFileName() + Path.GetExtension(imageFile.FileName);
+                string path = Path.Combine(_webHostEnvironment.WebRootPath, "Images/Blog", fileName);
+                string imageUrl = Path.Combine("/Images/Blog/", fileName);
 
                 var data = await _blogRepository.AddBlog(blog, imageUrl);
                 var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Your blog has been posted.", Result = data };
+
+                if (response.IsSuccess)
+                    await UploadImage(imageFile, path);
+
                 return Ok(response);
             }
             catch (Exception ex)
@@ -112,13 +122,24 @@ namespace BisleriumBlog.API.Controllers
         {
             try
             {
-                var imageUrl = await UploadImage(updatedBlog.Image);
-                var result = await _blogRepository.UpdateBlog(blogId, updatedBlog, imageUrl);
-                return Ok(new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog updated succesfully.", Result = result });
+                var imageFile = updatedBlog.Image;
+                ValidateImageFile(imageFile);
+
+                string fileName = Path.GetRandomFileName() + Path.GetExtension(imageFile.FileName);
+                string path = Path.Combine(_webHostEnvironment.WebRootPath, "Images/Blog", fileName);
+                string imageUrl = Path.Combine("/Images/Blog/", fileName);
+
+                var data = await _blogRepository.UpdateBlog(blogId, updatedBlog, imageUrl);
+                var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog updated succesfully.", Result = data };
+                if (response.IsSuccess)
+                    await UploadImage(imageFile, path);
+
+                return Ok(response);
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception ex)
             {
-                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
             }
         }
 
@@ -132,17 +153,26 @@ namespace BisleriumBlog.API.Controllers
             return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find Blog with the id {blogId}" });
         }
 
-        private async Task<string> UploadImage(IFormFile imageFile)
+        private async Task UploadImage(IFormFile imageFile, string path)
         {
-            string fileName = Path.GetRandomFileName() + Path.GetExtension(imageFile.FileName);
-            string path = Path.Combine(_webHostEnvironment.WebRootPath, "Images/Blog", fileName);
-
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 await imageFile.CopyToAsync(stream);
             }
+        }
 
-            return Path.Combine("/Images/Blog/", fileName);
+        private void ValidateImageFile(IFormFile imageFile)
+        {
+            if (imageFile == null)
+                throw new Exception("Please upload an image file.");
+
+            string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg" };
+            string extension = Path.GetExtension(imageFile.FileName).ToLower();
+            if (allowedExtensions.Contains(extension))
+                throw new Exception("Invalid file type. Please upload an image.");
+
+            if (imageFile.Length < 3*1024*1024)
+                throw new Exception("The uploaded file exceeds the maximum size limit of [size limit] MB. Please upload a smaller file.");
         }
     }
 }
