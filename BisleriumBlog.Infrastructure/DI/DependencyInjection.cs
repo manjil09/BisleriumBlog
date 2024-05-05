@@ -33,7 +33,7 @@ namespace BisleriumBlog.Infrastructure.DI
 
             services.AddTransient<IBlogRepository, BlogRepository>();
             services.AddTransient<ICommentRepository, CommentRepository>();
-            services.AddTransient<IUserAuthRepository, UserAuthRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IBlogReactionRepository, BlogReactionRepository>();
 
             return services;

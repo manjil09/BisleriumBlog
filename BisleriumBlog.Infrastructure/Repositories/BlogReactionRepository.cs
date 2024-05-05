@@ -5,6 +5,7 @@ using BisleriumBlog.Domain.Enums;
 using BisleriumBlog.Infrastructure.Data;
 using BisleriumBlog.Infrastructure.Mapper;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.Design;
 
 namespace BisleriumBlog.Infrastructure.Repositories
 {
@@ -42,14 +43,28 @@ namespace BisleriumBlog.Infrastructure.Repositories
             }
             return false;
         }
-        public Task<BlogReactionDTO> GetReactionById(int blogReactionId)
+        public async Task<BlogReactionDTO> GetReactionById(int id)
         {
-            throw new NotImplementedException();
+            var reaction = await _appDbContext.BlogReactions.Where(x => x.Id == id ).SingleOrDefaultAsync();
+
+            if (reaction != null)
+                return MapperlyMapper.BlogReactionToBlogReactionDTO(reaction);
+
+            throw new Exception($"Could not find Reaction with the id {id}");
         }
 
-        public Task<BlogReactionDTO> GetReactionByUserIdAndBlogId(string userId, int blogId)
+        public async Task<BlogReactionDTO> GetReactionByUserIdAndBlogId(string userId, int blogId)
         {
-            throw new NotImplementedException();
+            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
+            if (!userExists)
+                throw new Exception("The user with the provided ID does not exist.");
+
+            var reaction = await _appDbContext.BlogReactions.Where(x=> x.BlogId == blogId&&x.UserId==userId).SingleOrDefaultAsync();
+
+            if (reaction != null)
+                return MapperlyMapper.BlogReactionToBlogReactionDTO(reaction);
+
+            throw new Exception("The user has not reacted in the blog.");
         }
 
         public async Task<(int totalUpvotes, int totalDownvotes, List<BlogReactionDTO>)> GetReactionsByBlogId(int blogId)
@@ -66,9 +81,20 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return (totalUpvotes, totalDownvotes, reactionDTOs);
         }
 
-        public Task<BlogReactionDTO> UpdateReaction(int blogId, BlogReactionDTO updatedReaction)
+        public async Task<BlogReactionDTO> UpdateReaction(int id, BlogReactionDTO updatedReaction)
         {
-            throw new NotImplementedException();
+            var reactionForUpdate = await _appDbContext.BlogReactions.Where(x => x.Id == id).SingleOrDefaultAsync();
+            if (reactionForUpdate != null)
+            {
+                reactionForUpdate.Type = updatedReaction.Type;
+                reactionForUpdate.ReactedAt = DateTime.Now;
+
+                await _appDbContext.SaveChangesAsync();
+
+                return MapperlyMapper.BlogReactionToBlogReactionDTO(reactionForUpdate);
+            }
+
+            throw new KeyNotFoundException($"Could not find Reaction with the id {id}");
         }
     }
 }

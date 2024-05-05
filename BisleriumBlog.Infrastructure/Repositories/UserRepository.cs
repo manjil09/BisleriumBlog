@@ -2,6 +2,8 @@
 using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
+using BisleriumBlog.Infrastructure.Data;
+using BisleriumBlog.Infrastructure.Mapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -11,13 +13,13 @@ using System.Text;
 
 namespace BisleriumBlog.Infrastructure.Repositories
 {
-    public class UserAuthRepository : IUserAuthRepository
+    public class UserRepository : IUserRepository
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
         private IdentityUser? _user;
 
-        public UserAuthRepository(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public UserRepository(UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             this._userManager = userManager;
             this._configuration = configuration;
@@ -59,6 +61,24 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 return true;
             return false;
         }
+
+        //public async Task<UserLoginDTO> UpdateUser(string id, UserRegisterDTO updatedUser)
+        //{
+        //    var commentForUpdate = await _appDbContext.Comments.Where(x => x.Id == commentId && !x.IsDeleted).SingleOrDefaultAsync();
+        //    if (commentForUpdate != null)
+        //    {
+        //        await AddToCommentHistory(commentForUpdate);
+
+        //        commentForUpdate.Body = updatedUser.Body;
+        //        commentForUpdate.UpdatedAt = DateTime.Now;
+
+        //        await _appDbContext.SaveChangesAsync();
+
+        //        return MapperlyMapper.CommentToCommentResponseDTO(commentForUpdate);
+        //    }
+
+        //    throw new KeyNotFoundException($"Could not find Comment with the id {commentId}");
+        //}
 
         public async Task<Response<string>> CreateToken()
         {

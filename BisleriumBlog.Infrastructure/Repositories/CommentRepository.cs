@@ -42,6 +42,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             commentToDelete.IsDeleted = true;
 
             await AddToCommentHistory(commentToDelete);
+            _appDbContext.Comments.Remove(commentToDelete);
             await _appDbContext.SaveChangesAsync();
             return true;
         }

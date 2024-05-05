@@ -80,13 +80,13 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [Authorize(Roles = "User")]
-        [HttpGet("getUerComments/{blogId}/{userId}")]
+        [HttpGet("getUserComments/{blogId}/{userId}")]
         public async Task<IActionResult> GetCommentByUserIdAndBlogId(string userId, int blogId)
         {
             try
             {
-                var userComent = await _commentRepository.GetCommentByUserIdAndBlogId(userId, blogId);
-                return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "Uer comment on the blog fetched successfully.", Result = userComent });
+                var userComment = await _commentRepository.GetCommentByUserIdAndBlogId(userId, blogId);
+                return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "User comment on the blog fetched successfully.", Result = userComment });
             }
             catch (Exception ex)
             {

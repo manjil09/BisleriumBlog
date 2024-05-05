@@ -49,6 +49,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             blogToDelete.IsDeleted = true;
 
             await AddToBlogHistory(blogToDelete);
+            _appDbContext.Blogs.Remove(blogToDelete);
             await _appDbContext.SaveChangesAsync();
             return true;
         }

@@ -4,7 +4,7 @@ using BisleriumBlog.Domain.Enums;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
-    public interface IUserAuthRepository
+    public interface IUserRepository
     {
         Task<Response<string>> Register(UserRegisterDTO userForRegister, UserRole role = UserRole.User);
         Task<bool> ValidateUser(UserLoginDTO userForLogin);

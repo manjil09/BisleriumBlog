@@ -17,9 +17,9 @@ namespace BisleriumBlog.API.Controllers
             _blogReactionRepository = blogReactionRepository;
         }
 
-        //[Authorize(Roles = "User")]
+        [Authorize(Roles = "User")]
         [HttpPost("add")]
-        public async Task<IActionResult> AddBlog(BlogReactionDTO reaction)
+        public async Task<IActionResult> AddReaction(BlogReactionDTO reaction)
         {
             try
             {
@@ -34,14 +34,47 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
-        [HttpDelete("delete/{blogId}")]
-        public async Task<IActionResult> DeleteBlog(int blogReactionId)
+        [Authorize(Roles = "User")]
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateBlog(int id, BlogReactionDTO updatedReaction)
         {
-            var success = await _blogReactionRepository.DeleteReaction(blogReactionId);
+            try
+            {
+                var data = await _blogReactionRepository.UpdateReaction(id, updatedReaction);
+                var response = new Response<BlogReactionDTO> { IsSuccess = true, Message = "Reaction updated succesfully.", Result = data };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteReaction(int id)
+        {
+            var success = await _blogReactionRepository.DeleteReaction(id);
             if (success)
                 return Ok(new Response<bool> { IsSuccess = true, Message = "Reaction removed succesfully." });
 
-            return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find BlogReaction with the id {blogReactionId}" });
+            return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find BlogReaction with the id {id}" });
+        }
+
+        [HttpGet("getById/{id}")]
+        public async Task<IActionResult> GetReactionById(int id)
+        {
+            try
+            {
+                var reaction = await _blogReactionRepository.GetReactionById(id);
+                return Ok(new Response<BlogReactionDTO> { IsSuccess = true, Message = "Blog Reaction fetch successful.", Result = reaction });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
+            }
         }
 
         [HttpGet("getReactions/{blogId}")]
@@ -66,6 +99,21 @@ namespace BisleriumBlog.API.Controllers
                 };
 
                 return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "User")]
+        [HttpGet("getUserReactions/{blogId}/{userId}")]
+        public async Task<IActionResult> GetReactionByUserIdAndBlogId(string userId, int blogId)
+        {
+            try
+            {
+                var userReaction = await _blogReactionRepository.GetReactionByUserIdAndBlogId(userId, blogId);
+                return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "User reaction on the blog fetched successfully.", Result = userReaction });
             }
             catch (Exception ex)
             {
