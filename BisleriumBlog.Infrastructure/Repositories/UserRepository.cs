@@ -1,9 +1,8 @@
 ﻿using BisleriumBlog.Application.Common;
 using BisleriumBlog.Application.DTOs.UserDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
+using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Domain.Enums;
-using BisleriumBlog.Infrastructure.Data;
-using BisleriumBlog.Infrastructure.Mapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -15,11 +14,11 @@ namespace BisleriumBlog.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
-        private IdentityUser? _user;
+        private ApplicationUser? _user;
 
-        public UserRepository(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public UserRepository(UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             this._userManager = userManager;
             this._configuration = configuration;
@@ -31,7 +30,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             if (existingUser != null)
                 return new Response<string>() { IsSuccess = false, Message = "User name already exists!" };
 
-            IdentityUser user = new()
+            ApplicationUser user = new()
             {
                 UserName = userForRegister.UserName,
                 Email = userForRegister.UserEmail,
@@ -62,23 +61,50 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return false;
         }
 
-        //public async Task<UserLoginDTO> UpdateUser(string id, UserRegisterDTO updatedUser)
-        //{
-        //    var commentForUpdate = await _appDbContext.Comments.Where(x => x.Id == commentId && !x.IsDeleted).SingleOrDefaultAsync();
-        //    if (commentForUpdate != null)
-        //    {
-        //        await AddToCommentHistory(commentForUpdate);
+        public async Task<Response<string>> UpdateUser(string id, UserUpdateDTO updatedUser)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return new Response<string>() { IsSuccess = false, Message = "User not found!" };
 
-        //        commentForUpdate.Body = updatedUser.Body;
-        //        commentForUpdate.UpdatedAt = DateTime.Now;
+            var existingUserName = await _userManager.FindByNameAsync(updatedUser.UserName);
+            if (existingUserName != null && existingUserName.Id != user.Id)
+                return new Response<string>() { IsSuccess = false, Message = "Username already exists!" };
 
-        //        await _appDbContext.SaveChangesAsync();
+            var existingUserEmail= await _userManager.FindByEmailAsync(updatedUser.UserEmail);
+            if (existingUserEmail != null && existingUserEmail.Id != user.Id)
+                return new Response<string>() { IsSuccess = false, Message = "Email address already exists!" };
 
-        //        return MapperlyMapper.CommentToCommentResponseDTO(commentForUpdate);
-        //    }
+            user.UserName = updatedUser.UserName;
+            user.Email = updatedUser.UserEmail;
 
-        //    throw new KeyNotFoundException($"Could not find Comment with the id {commentId}");
-        //}
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return new Response<string>() { IsSuccess = false, Message = "Failed to update user details!" };
+
+            return new Response<string>() { IsSuccess = true, Message = "User details updated successfully!" };
+        }
+
+        public async Task<Response<string>> ChangePassword(string userId, string currentPassword, string newPassword)
+        {
+            var existingUser = await _userManager.FindByIdAsync(userId);
+            if (existingUser == null)
+                return new Response<string>() { IsSuccess = false, Message = "User not found!" };
+
+            if (newPassword == currentPassword)
+                return new Response<string>() { IsSuccess = false, Message = "New password cannot be the same as previous password!" };
+
+            var result = await _userManager.CheckPasswordAsync(existingUser, currentPassword);
+            if (!result)
+                return new Response<string>() { IsSuccess = false, Message = "Incorrect current password!" };
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
+            var changePasswordResult = await _userManager.ResetPasswordAsync(existingUser, token, newPassword);
+            if (!changePasswordResult.Succeeded)
+                return new Response<string>() { IsSuccess = false, Message = "Failed to change password!" };
+
+            return new Response<string>() { IsSuccess = true, Message = "Password changed successfully!" };
+        }
 
         public async Task<Response<string>> CreateToken()
         {

@@ -49,7 +49,6 @@ namespace BisleriumBlog.Infrastructure.Repositories
             blogToDelete.IsDeleted = true;
 
             await AddToBlogHistory(blogToDelete);
-            _appDbContext.Blogs.Remove(blogToDelete);
             await _appDbContext.SaveChangesAsync();
             return true;
         }
@@ -72,11 +71,19 @@ namespace BisleriumBlog.Infrastructure.Repositories
                     break;
             }
 
-            //var blogs = await blogQuery.ToListAsync();
             var paginatedBlogs = await PaginatedList<Blog>.CreateAsync(blogQuery, pageIndex ?? 1, pageSize ?? 10);
             int totalPages = paginatedBlogs.TotalPages;
 
             var blogDTOs = paginatedBlogs.Select(MapperlyMapper.BlogToBlogResponseDTO).ToList();
+
+            var blogDTOsWithPopularity = paginatedBlogs.Select(blog =>
+            {
+                var blogDTO = MapperlyMapper.BlogToBlogResponseDTO(blog);
+                var popularity = blog.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
+                                 blog.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
+                                 blog.Comments.Count(c => !c.IsDeleted) * CommentWeightage;
+                return (blogDTO, popularity);
+            }).ToList();
 
             return (totalPages, blogDTOs);
         }

@@ -26,7 +26,7 @@ builder.Services.AddSwaggerGen(swagger =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Example: Bearer 12345abcdef",
+        Description = "Example: Bearer <your token>",
     });
     swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
     {

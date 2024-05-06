@@ -10,6 +10,5 @@ namespace BisleriumBlog.Domain.Entities
         public int BlogId { get; set; }
         public Blog Blog { get; set; } //Reference to dependent entity
 
-        //pending reference to user table
     }
 }

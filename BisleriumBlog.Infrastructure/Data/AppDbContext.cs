@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 
 namespace BisleriumBlog.Infrastructure.Data
 {
-    public class AppDbContext : IdentityDbContext<IdentityUser, IdentityRole, string>
+    public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -24,11 +24,18 @@ namespace BisleriumBlog.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
+            //builder.Entity<Blog>()
+            //    .HasOne(b => b.User)
+            //    .WithMany(u => u.Blogs) 
+            //    .HasForeignKey<Blog>(b => b.UserId)
+            //    .OnDelete(DeleteBehavior.NoAction) 
+            //    .onUpdate(DeleteBehavior.NoAction);
+
             //make sure each user can only have 1 reaction and 1 comment on each blog
-            builder.Entity<Comment>().HasIndex(x => new{x.BlogId,x.UserId}).IsUnique();
-            builder.Entity<BlogReaction>().HasIndex(x => new {x.BlogId, x.UserId }).IsUnique();
-            builder.Entity<CommentReaction>().HasIndex(x => new {x.CommentId, x.UserId }).IsUnique();
-            
+            builder.Entity<Comment>().HasIndex(x => new { x.BlogId, x.UserId }).IsUnique();
+            builder.Entity<BlogReaction>().HasIndex(x => new { x.BlogId, x.UserId }).IsUnique();
+            builder.Entity<CommentReaction>().HasIndex(x => new { x.CommentId, x.UserId }).IsUnique();
+
             string ADMIN_ID = "36109bb5-c596-4fee-a016-1d8f8c7496cd";
             string ADMIN_ROLE_ID = "3e4007fd-f323-41c5-892a-29e4c50d0f6b";
             string USER_ROLE_ID = "f8ca833b-8b85-41b3-9279-eb99b563326d";
@@ -52,7 +59,7 @@ namespace BisleriumBlog.Infrastructure.Data
             });
 
             //seed user
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 Id = ADMIN_ID,
                 Email = "manjil.koju.a@gmail.com",
@@ -60,9 +67,9 @@ namespace BisleriumBlog.Infrastructure.Data
                 UserName = "SpAdmin",
                 NormalizedUserName = "SPADMIN"
             };
-            var passwordHasher = new PasswordHasher<IdentityUser>();
+            var passwordHasher = new PasswordHasher<ApplicationUser>();
             user.PasswordHash = passwordHasher.HashPassword(user, "admin_12345");
-            builder.Entity<IdentityUser>().HasData(user);
+            builder.Entity<ApplicationUser>().HasData(user);
 
             builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
             {

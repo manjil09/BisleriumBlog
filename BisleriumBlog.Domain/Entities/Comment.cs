@@ -14,7 +14,6 @@ namespace BisleriumBlog.Domain.Entities
         public Blog Blog { get; set; } //Reference to dependent entity
         public List<CommentReaction> Reactions { get; set; } //referencing one to many relation with commentReaction entity
         public List<CommentHistory> History { get; set; } //referencing one to many relation with commentHistory entity
-
-        //pending reference to user table
+        public ApplicationUser User { get; set; }
     }
 }

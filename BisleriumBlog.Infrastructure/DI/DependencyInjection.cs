@@ -1,4 +1,5 @@
 ﻿using BisleriumBlog.Application.Interfaces.IRepositories;
+using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Infrastructure.Data;
 using BisleriumBlog.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,7 +19,7 @@ namespace BisleriumBlog.Infrastructure.DI
             //use connection string from appsettings.json
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("AppConnectionString"), b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
-            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = true;
@@ -35,6 +36,7 @@ namespace BisleriumBlog.Infrastructure.DI
             services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IBlogReactionRepository, BlogReactionRepository>();
+            services.AddTransient<ICommentReactionRepository, CommentReactionRepository>();
 
             return services;
         }

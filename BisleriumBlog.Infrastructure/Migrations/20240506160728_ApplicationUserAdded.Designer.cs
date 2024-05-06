@@ -4,6 +4,7 @@ using BisleriumBlog.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BisleriumBlog.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240506160728_ApplicationUserAdded")]
+    partial class ApplicationUserAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,14 +94,14 @@ namespace BisleriumBlog.Infrastructure.Migrations
                         {
                             Id = "36109bb5-c596-4fee-a016-1d8f8c7496cd",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "57aa7ed1-f2ec-47df-b604-e4299ff3383c",
+                            ConcurrencyStamp = "9ff91bc3-f998-4f96-b726-d06ee51d1d10",
                             Email = "manjil.koju.a@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedUserName = "SPADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDcqGPycLDdqXVi8PvRtKDpn3Wcp4SsPnYxQ9uFtM/9cdMlt1ZxUKc+MjO8+yyyDRw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEF4wTzAs+TSpQfd5FWhDU40ZYsYf+0JqOMMIxhofz+TK8lFux7TOgyxTTtUAGE/dJQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "8dc5dbe6-8018-405d-97ec-29e6ab8407a5",
+                            SecurityStamp = "46426573-9702-4bfd-a0c6-5ffb9d6d4bfe",
                             TwoFactorEnabled = false,
                             UserName = "SpAdmin"
                         });
@@ -162,7 +165,7 @@ namespace BisleriumBlog.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("Image")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

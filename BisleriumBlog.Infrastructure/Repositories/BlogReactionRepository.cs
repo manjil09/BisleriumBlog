@@ -5,7 +5,6 @@ using BisleriumBlog.Domain.Enums;
 using BisleriumBlog.Infrastructure.Data;
 using BisleriumBlog.Infrastructure.Mapper;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.Design;
 
 namespace BisleriumBlog.Infrastructure.Repositories
 {
@@ -19,9 +18,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<bool> ToggleUpvote(int blogId, string userId)
         {
-            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
-            if (!userExists)
-                throw new Exception("The user with the provided ID does not exist.");
+            await CheckUserExists(userId);
+            await CheckBlogExists(blogId);
 
             var existingReaction = await _appDbContext.BlogReactions
                 .FirstOrDefaultAsync(x=>x.BlogId==blogId && x.UserId == userId);
@@ -59,9 +57,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<bool> ToggleDownvote(int blogId, string userId)
         {
-            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
-            if (!userExists)
-                throw new Exception("The user with the provided ID does not exist.");
+            await CheckUserExists(userId);
+            await CheckBlogExists(blogId);
 
             var existingReaction = await _appDbContext.BlogReactions
                 .FirstOrDefaultAsync(x => x.BlogId == blogId && x.UserId == userId);
@@ -109,9 +106,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<BlogReactionDTO> GetReactionByUserIdAndBlogId(string userId, int blogId)
         {
-            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
-            if (!userExists)
-                throw new Exception("The user with the provided ID does not exist.");
+            await CheckUserExists(userId);
+            await CheckBlogExists(blogId);
 
             var reaction = await _appDbContext.BlogReactions.Where(x=> x.BlogId == blogId&&x.UserId==userId).SingleOrDefaultAsync();
 
@@ -123,9 +119,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<(int totalUpvotes, int totalDownvotes, List<BlogReactionDTO>)> GetReactionsByBlogId(int blogId)
         {
-            bool blogExists = await _appDbContext.Blogs.AnyAsync(x=>x.Id == blogId && !x.IsDeleted);
-            if (!blogExists)
-                throw new Exception($"The blog with id {blogId} does not exist.");
+            await CheckBlogExists(blogId);
 
             var reactions = await _appDbContext.BlogReactions.Where(x => x.BlogId == blogId).ToListAsync();
             int totalUpvotes = reactions.Count(x => x.Type == ReactionType.Upvote);
@@ -133,6 +127,19 @@ namespace BisleriumBlog.Infrastructure.Repositories
             var reactionDTOs = reactions.Select(MapperlyMapper.BlogReactionToBlogReactionDTO).ToList();
 
             return (totalUpvotes, totalDownvotes, reactionDTOs);
+        }
+
+        private async Task CheckUserExists(string userId)
+        {
+            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
+            if (!userExists)
+                throw new Exception("The user with the provided ID does not exist.");
+        }
+        private async Task CheckBlogExists(int blogId)
+        {
+            bool blogExists = await _appDbContext.Blogs.AnyAsync(x => x.Id == blogId && !x.IsDeleted);
+            if (!blogExists)
+                throw new Exception($"The blog with id {blogId} does not exist.");
         }
     }
 }

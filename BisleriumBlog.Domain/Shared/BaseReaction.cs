@@ -1,4 +1,5 @@
-﻿using BisleriumBlog.Domain.Enums;
+﻿using BisleriumBlog.Domain.Entities;
+using BisleriumBlog.Domain.Enums;
 
 namespace BisleriumBlog.Domain.Shared
 {
@@ -7,5 +8,6 @@ namespace BisleriumBlog.Domain.Shared
         public string UserId { get; set; }
         public ReactionType Type { get; set; }
         public DateTime ReactedAt { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }

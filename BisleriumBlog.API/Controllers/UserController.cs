@@ -14,7 +14,7 @@ namespace BisleriumBlog.API.Controllers
         private readonly IUserRepository _userRepository;
         public UserController(IUserRepository userRepository)
         {
-            this._userRepository = userRepository;
+            _userRepository = userRepository;
         }
 
         [HttpPost("register")]
@@ -48,6 +48,16 @@ namespace BisleriumBlog.API.Controllers
                 return Ok(result);
             }
             return BadRequest("Invalid username or password!");
+        }
+
+        [HttpPut("UpdateUser/{id}")]
+        public async Task<IActionResult> UpdateUser(string id, UserUpdateDTO updatedUser)
+        {
+            var result = await _userRepository.UpdateUser(id, updatedUser);
+
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
+            return Ok(result.Message);
         }
     }
 }
