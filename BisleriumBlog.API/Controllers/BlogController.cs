@@ -166,9 +166,9 @@ namespace BisleriumBlog.API.Controllers
             if (imageFile == null)
                 throw new Exception("Please upload an image file.");
 
-            string[] allowedExtensions = { "jpg", "jpeg", "png", "gif", "bmp", "svg" };
+            string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg" };
             string extension = Path.GetExtension(imageFile.FileName).ToLower();
-            if (allowedExtensions.Contains(extension))
+            if (!allowedExtensions.Contains(extension))
                 throw new Exception("Invalid file type. Please upload an image.");
 
             if (imageFile.Length > 3 * 1024 * 1024)
