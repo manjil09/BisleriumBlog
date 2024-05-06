@@ -1,4 +1,4 @@
-﻿using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.DTOs.CommentDTO;
 using BisleriumBlog.Domain.Enums;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories

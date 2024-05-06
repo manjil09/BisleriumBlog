@@ -1,4 +1,4 @@
-﻿using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.DTOs.BlogReactionDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Domain.Enums;
@@ -17,32 +17,86 @@ namespace BisleriumBlog.Infrastructure.Repositories
             _appDbContext = appDbContext;
         }
 
-        public async Task<BlogReactionDTO> AddReaction(BlogReactionDTO blogReaction)
+        public async Task<bool> ToggleUpvote(int blogId, string userId)
         {
-            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == blogReaction.UserId);
+            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
             if (!userExists)
                 throw new Exception("The user with the provided ID does not exist.");
 
-            var newReaction = MapperlyMapper.BlogReactionDTOToBlogReaction(blogReaction);
-            newReaction.ReactedAt = DateTime.Now;
+            var existingReaction = await _appDbContext.BlogReactions
+                .FirstOrDefaultAsync(x=>x.BlogId==blogId && x.UserId == userId);
 
-            await _appDbContext.BlogReactions.AddAsync(newReaction);
-            await _appDbContext.SaveChangesAsync();
-
-            return blogReaction;
-        }
-
-        public async Task<bool> DeleteReaction(int blogReactionId)
-        {
-            var reactionToDelete = await _appDbContext.BlogReactions.FindAsync(blogReactionId);
-            if (reactionToDelete != null)
+            if (existingReaction != null)
             {
-                _appDbContext.BlogReactions.Remove(reactionToDelete);
+                if (existingReaction.Type == ReactionType.Upvote)
+                {
+                    _appDbContext.BlogReactions.Remove(existingReaction);
+                    await _appDbContext.SaveChangesAsync();
+                    return true;
+                }
+                else
+                {
+                    existingReaction.Type = ReactionType.Upvote;
+                    existingReaction.ReactedAt = DateTime.Now;
+                    await _appDbContext.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                var newReaction = new BlogReaction
+                {
+                    BlogId = blogId,
+                    UserId = userId,
+                    Type = ReactionType.Upvote,
+                    ReactedAt = DateTime.Now
+                };
+                await _appDbContext.BlogReactions.AddAsync(newReaction);
                 await _appDbContext.SaveChangesAsync();
                 return true;
             }
             return false;
         }
+
+        public async Task<bool> ToggleDownvote(int blogId, string userId)
+        {
+            bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
+            if (!userExists)
+                throw new Exception("The user with the provided ID does not exist.");
+
+            var existingReaction = await _appDbContext.BlogReactions
+                .FirstOrDefaultAsync(x => x.BlogId == blogId && x.UserId == userId);
+
+            if (existingReaction != null)
+            {
+                if (existingReaction.Type == ReactionType.Downvote)
+                {
+                    _appDbContext.BlogReactions.Remove(existingReaction);
+                    await _appDbContext.SaveChangesAsync();
+                    return true;
+                }
+                else
+                {
+                    existingReaction.Type = ReactionType.Downvote;
+                    existingReaction.ReactedAt = DateTime.Now;
+                    await _appDbContext.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                var newReaction = new BlogReaction
+                {
+                    BlogId = blogId,
+                    UserId = userId,
+                    Type = ReactionType.Downvote,
+                    ReactedAt = DateTime.Now
+                };
+                await _appDbContext.BlogReactions.AddAsync(newReaction);
+                await _appDbContext.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
         public async Task<BlogReactionDTO> GetReactionById(int id)
         {
             var reaction = await _appDbContext.BlogReactions.Where(x => x.Id == id ).SingleOrDefaultAsync();
@@ -79,22 +133,6 @@ namespace BisleriumBlog.Infrastructure.Repositories
             var reactionDTOs = reactions.Select(MapperlyMapper.BlogReactionToBlogReactionDTO).ToList();
 
             return (totalUpvotes, totalDownvotes, reactionDTOs);
-        }
-
-        public async Task<BlogReactionDTO> UpdateReaction(int id, BlogReactionDTO updatedReaction)
-        {
-            var reactionForUpdate = await _appDbContext.BlogReactions.Where(x => x.Id == id).SingleOrDefaultAsync();
-            if (reactionForUpdate != null)
-            {
-                reactionForUpdate.Type = updatedReaction.Type;
-                reactionForUpdate.ReactedAt = DateTime.Now;
-
-                await _appDbContext.SaveChangesAsync();
-
-                return MapperlyMapper.BlogReactionToBlogReactionDTO(reactionForUpdate);
-            }
-
-            throw new KeyNotFoundException($"Could not find Reaction with the id {id}");
         }
     }
 }

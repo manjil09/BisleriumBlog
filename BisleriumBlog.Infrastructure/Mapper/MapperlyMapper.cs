@@ -1,4 +1,6 @@
-﻿using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.DTOs.BlogDTO;
+using BisleriumBlog.Application.DTOs.BlogReactionDTO;
+using BisleriumBlog.Application.DTOs.CommentDTO;
 using BisleriumBlog.Domain.Entities;
 using Riok.Mapperly.Abstractions;
 

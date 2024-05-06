@@ -1,6 +1,6 @@
 ﻿using BisleriumBlog.Domain.Enums;
 
-namespace BisleriumBlog.Application.DTOs
+namespace BisleriumBlog.Application.DTOs.BlogReactionDTO
 {
     public class BlogReactionDTO
     {

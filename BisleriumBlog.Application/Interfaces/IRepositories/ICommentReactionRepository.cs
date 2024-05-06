@@ -1,4 +1,4 @@
-﻿using BisleriumBlog.Application.DTOs;
+﻿using BisleriumBlog.Application.DTOs.CommentReactionDTO;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories
 {

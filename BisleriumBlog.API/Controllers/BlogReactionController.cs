@@ -1,5 +1,5 @@
 ﻿using BisleriumBlog.Application.Common;
-using BisleriumBlog.Application.DTOs;
+using BisleriumBlog.Application.DTOs.BlogReactionDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +17,13 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [Authorize(Roles = "User")]
-        [HttpPost("add")]
-        public async Task<IActionResult> AddReaction(BlogReactionDTO reaction)
+        [HttpPost("upvote")]
+        public async Task<IActionResult> ToggleUpvote(int blogId, string userId)
         {
             try
             {
-                var data = await _blogReactionRepository.AddReaction(reaction);
-                var response = new Response<BlogReactionDTO> { IsSuccess = true, Message = "Your blog has been posted.", Result = data };
+                var data = await _blogReactionRepository.ToggleUpvote(blogId,userId);
+                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the blog has been updated." };
                 return Ok(response);
             }
             catch (Exception ex)
@@ -34,13 +34,13 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [Authorize(Roles = "User")]
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateBlog(int id, BlogReactionDTO updatedReaction)
+        [HttpPost("downvote")]
+        public async Task<IActionResult> ToggleDownvote(int blogId,string userId)
         {
             try
             {
-                var data = await _blogReactionRepository.UpdateReaction(id, updatedReaction);
-                var response = new Response<BlogReactionDTO> { IsSuccess = true, Message = "Reaction updated succesfully.", Result = data };
+                var data = await _blogReactionRepository.ToggleDownvote(blogId, userId);
+                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the blog has been updated." };
 
                 return Ok(response);
             }
@@ -49,17 +49,6 @@ namespace BisleriumBlog.API.Controllers
                 string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
                 return BadRequest(new Response<string> { IsSuccess = false, Message = message });
             }
-        }
-
-        [Authorize(Roles = "User")]
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteReaction(int id)
-        {
-            var success = await _blogReactionRepository.DeleteReaction(id);
-            if (success)
-                return Ok(new Response<bool> { IsSuccess = true, Message = "Reaction removed succesfully." });
-
-            return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find BlogReaction with the id {id}" });
         }
 
         [HttpGet("getById/{id}")]

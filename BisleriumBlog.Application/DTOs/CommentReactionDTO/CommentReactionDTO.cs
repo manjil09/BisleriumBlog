@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BisleriumBlog.Application.DTOs
+namespace BisleriumBlog.Application.DTOs.CommentReactionDTO
 {
     public class CommentReactionDTO
     {

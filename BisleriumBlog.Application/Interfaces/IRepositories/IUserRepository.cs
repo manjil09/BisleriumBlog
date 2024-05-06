@@ -1,5 +1,5 @@
 ﻿using BisleriumBlog.Application.Common;
-using BisleriumBlog.Application.DTOs;
+using BisleriumBlog.Application.DTOs.UserDTO;
 using BisleriumBlog.Domain.Enums;
 
 namespace BisleriumBlog.Application.Interfaces.IRepositories

@@ -1,8 +1,8 @@
-﻿namespace BisleriumBlog.Application.DTOs
+﻿namespace BisleriumBlog.Application.DTOs.BlogDTO
 {
     public class BlogResponseDTO
     {
-        public int Id {  get; set; }
+        public int Id { get; set; }
         public string Title { get; set; }
         public string Body { get; set; }
         public string ImageUrl { get; set; }

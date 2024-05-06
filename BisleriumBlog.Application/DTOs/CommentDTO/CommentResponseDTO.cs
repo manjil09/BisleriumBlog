@@ -1,4 +1,4 @@
-﻿namespace BisleriumBlog.Application.DTOs
+﻿namespace BisleriumBlog.Application.DTOs.CommentDTO
 {
     public class CommentResponseDTO
     {

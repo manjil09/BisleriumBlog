@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
-namespace BisleriumBlog.Application.DTOs
+namespace BisleriumBlog.Application.DTOs.BlogDTO
 {
     public class BlogCreateDTO
     {
