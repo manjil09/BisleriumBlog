@@ -1,29 +1,29 @@
 ﻿using BisleriumBlog.Application.Common;
-using BisleriumBlog.Application.DTOs.BlogReactionDTO;
+using BisleriumBlog.Application.DTOs.CommentReactionDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BisleriumBlog.API.Controllers
 {
-    [Route("api/blog/reaction")]
+    [Route("api/comment/reaction")]
     [ApiController]
-    public class BlogReactionController : ControllerBase
+    public class CommentReactionController : ControllerBase
     {
-        private readonly IBlogReactionRepository _blogReactionRepository;
-        public BlogReactionController(IBlogReactionRepository blogReactionRepository)
+        private readonly ICommentReactionRepository _commentReactionRepository;
+        public CommentReactionController(ICommentReactionRepository commentReactionRepository)
         {
-            _blogReactionRepository = blogReactionRepository;
+            _commentReactionRepository = commentReactionRepository;
         }
 
         [Authorize(Roles = "User")]
         [HttpPost("upvote")]
-        public async Task<IActionResult> ToggleUpvote(int blogId, string userId)
+        public async Task<IActionResult> ToggleUpvote(int commentId, string userId)
         {
             try
             {
-                var data = await _blogReactionRepository.ToggleUpvote(blogId,userId);
-                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the blog has been updated." };
+                var data = await _commentReactionRepository.ToggleUpvote(commentId, userId);
+                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the comment has been updated." };
                 return Ok(response);
             }
             catch (Exception ex)
@@ -35,12 +35,12 @@ namespace BisleriumBlog.API.Controllers
 
         [Authorize(Roles = "User")]
         [HttpPost("downvote")]
-        public async Task<IActionResult> ToggleDownvote(int blogId,string userId)
+        public async Task<IActionResult> ToggleDownvote(int commentId, string userId)
         {
             try
             {
-                var data = await _blogReactionRepository.ToggleDownvote(blogId, userId);
-                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the blog has been updated." };
+                var data = await _commentReactionRepository.ToggleDownvote(commentId, userId);
+                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the comment has been updated." };
 
                 return Ok(response);
             }
@@ -56,8 +56,8 @@ namespace BisleriumBlog.API.Controllers
         {
             try
             {
-                var reaction = await _blogReactionRepository.GetReactionById(id);
-                return Ok(new Response<BlogReactionDTO> { IsSuccess = true, Message = "Blog Reaction fetch successful.", Result = reaction });
+                var reaction = await _commentReactionRepository.GetReactionById(id);
+                return Ok(new Response<CommentReactionDTO> { IsSuccess = true, Message = "Comment Reaction fetch successful.", Result = reaction });
             }
             catch (KeyNotFoundException ex)
             {
@@ -65,24 +65,24 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
-        [HttpGet("getReactions/{blogId}")]
-        public async Task<IActionResult> GetReactionsByBlogId(int blogId)
+        [HttpGet("getReactions/{commentId}")]
+        public async Task<IActionResult> GetReactionsByBlogId(int commentId)
         {
             try
             {
-                var (totalUpvotes, totalDownvotes, reactions) = await _blogReactionRepository.GetReactionsByBlogId(blogId);
+                var (totalUpvotes, totalDownvotes, reactions) = await _commentReactionRepository.GetReactionsByCommentId(commentId);
 
                 if (totalUpvotes == 0 && totalDownvotes == 0)
                     return Ok(new Response<string>
                     {
                         IsSuccess = true,
-                        Message = "This blog has not received any reactions yet."
+                        Message = "This comment has not received any reactions yet."
                     });
 
                 var response = new Response<dynamic>
                 {
                     IsSuccess = true,
-                    Message = "Blog Reactions retrieved successfully.",
+                    Message = "Comment Reactions retrieved successfully.",
                     Result = new { TotalUpvotes = totalUpvotes, TotalDownvotes = totalDownvotes, Reactions = reactions }
                 };
 
@@ -95,13 +95,13 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [Authorize(Roles = "User")]
-        [HttpGet("getUserReactions/{blogId}/{userId}")]
-        public async Task<IActionResult> GetReactionByUserIdAndBlogId(string userId, int blogId)
+        [HttpGet("getUserReactions/{commentId}/{userId}")]
+        public async Task<IActionResult> GetReactionByUserIdAndBlogId(string userId, int commentId)
         {
             try
             {
-                var userReaction = await _blogReactionRepository.GetReactionByUserIdAndBlogId(userId, blogId);
-                return Ok(new Response<BlogReactionDTO> { IsSuccess = true, Message = "User reaction on the blog fetched successfully.", Result = userReaction });
+                var userReaction = await _commentReactionRepository.GetReactionByUserIdAndCommentId(userId, commentId);
+                return Ok(new Response<CommentReactionDTO> { IsSuccess = true, Message = "User reaction on the comment fetched successfully.", Result = userReaction });
             }
             catch (Exception ex)
             {

@@ -1,6 +1,7 @@
 ﻿using BisleriumBlog.Application.DTOs.BlogDTO;
 using BisleriumBlog.Application.DTOs.BlogReactionDTO;
 using BisleriumBlog.Application.DTOs.CommentDTO;
+using BisleriumBlog.Application.DTOs.CommentReactionDTO;
 using BisleriumBlog.Domain.Entities;
 using Riok.Mapperly.Abstractions;
 
@@ -22,7 +23,7 @@ namespace BisleriumBlog.Infrastructure.Mapper
         [MapProperty(source: nameof(Comment.Id), target: nameof(CommentHistory.CommentId))]
         public static partial CommentHistory CommentToCommentHistory(Comment comment);
 
-        public static partial BlogReaction BlogReactionDTOToBlogReaction(BlogReactionDTO blogReactionDto);
         public static partial BlogReactionDTO BlogReactionToBlogReactionDTO(BlogReaction blogReaction);
+        public static partial CommentReactionDTO CommentReactionToCommentReactionDTO(CommentReaction commentReaction);
     }
 }

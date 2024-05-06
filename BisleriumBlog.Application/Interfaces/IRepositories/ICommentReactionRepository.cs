@@ -4,10 +4,10 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
     public interface ICommentReactionRepository
     {
-        Task<CommentReactionDTO> AddCommentReaction(CommentReactionDTO reaction);
-        Task<CommentReactionDTO> ToggleCommentReaction(int reactionId, CommentReactionDTO reactionForUpdate);
-        Task<List<CommentReactionDTO>> GetCommentReactionByCommentId(int commentId);
-        Task<List<CommentReactionDTO>> GetCommentReactionByUserId(string userId);
-        Task<bool> DeleteCommentReaction(int blogReactionId);
+        Task<bool> ToggleUpvote(int commentId, string userId);
+        Task<bool> ToggleDownvote(int commentId, string userId);
+        Task<CommentReactionDTO> GetReactionById(int commentReactionId);
+        Task<(int totalUpvotes, int totalDownvotes, List<CommentReactionDTO>)> GetReactionsByCommentId(int commentId);
+        Task<CommentReactionDTO> GetReactionByUserIdAndCommentId(string userId, int commentId);
     }
 }
