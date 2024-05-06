@@ -1,7 +1,6 @@
 ﻿using BisleriumBlog.Application.Common;
 using BisleriumBlog.Application.DTOs;
 using BisleriumBlog.Application.Interfaces.IRepositories;
-using BisleriumBlog.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
