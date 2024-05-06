@@ -1,8 +1,10 @@
-﻿using BisleriumBlog.Application.Common;
+﻿using BisleriumBlog.API.SignalRHub;
+using BisleriumBlog.Application.Common;
 using BisleriumBlog.Application.DTOs.BlogReactionDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BisleriumBlog.API.Controllers
 {
@@ -11,9 +13,11 @@ namespace BisleriumBlog.API.Controllers
     public class BlogReactionController : ControllerBase
     {
         private readonly IBlogReactionRepository _blogReactionRepository;
-        public BlogReactionController(IBlogReactionRepository blogReactionRepository)
+        private IHubContext<NotificationHub,INotificationHub> _hubContext;
+        public BlogReactionController(IBlogReactionRepository blogReactionRepository, IHubContext<NotificationHub, INotificationHub> hubContext)
         {
             _blogReactionRepository = blogReactionRepository;
+            _hubContext = hubContext;
         }
 
         [Authorize(Roles = "User")]
@@ -23,8 +27,10 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var data = await _blogReactionRepository.ToggleUpvote(blogId,userId);
-                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the blog has been updated." };
-                return Ok(response);
+
+                if (data.Result != null)
+                    await _hubContext.Clients.Client(data.Result).SendNotification("You received an upvote in your blog.");
+                return Ok(data);
             }
             catch (Exception ex)
             {
@@ -40,9 +46,10 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var data = await _blogReactionRepository.ToggleDownvote(blogId, userId);
-                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the blog has been updated." };
 
-                return Ok(response);
+                if (data.Result != null)
+                    await _hubContext.Clients.Client(data.Result).SendNotification("You received a downvote in your blog.");
+                return Ok(data);
             }
             catch (Exception ex)
             {

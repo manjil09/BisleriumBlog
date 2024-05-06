@@ -1,10 +1,11 @@
+using BisleriumBlog.API.SignalRHub;
 using BisleriumBlog.Infrastructure.DI;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
 // Register services of Infrastructure layer
@@ -70,6 +71,8 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<NotificationHub>("/notification");
 app.UseCors("reactApp");
 app.MapControllers();
 

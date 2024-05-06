@@ -1,4 +1,5 @@
-﻿using BisleriumBlog.Application.DTOs.BlogReactionDTO;
+﻿using BisleriumBlog.Application.Common;
+using BisleriumBlog.Application.DTOs.BlogReactionDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Domain.Enums;
@@ -16,13 +17,18 @@ namespace BisleriumBlog.Infrastructure.Repositories
             _appDbContext = appDbContext;
         }
 
-        public async Task<bool> ToggleUpvote(int blogId, string userId)
+        public async Task<Response<string>> ToggleUpvote(int blogId, string userId)
         {
             await CheckUserExists(userId);
-            await CheckBlogExists(blogId);
+
+            var blog = await _appDbContext.Blogs.FindAsync(blogId);
+            if (blog == null)
+                throw new Exception($"The blog with id {blogId} does not exist.");
+
+            string creatorId = blog.UserId;
 
             var existingReaction = await _appDbContext.BlogReactions
-                .FirstOrDefaultAsync(x=>x.BlogId==blogId && x.UserId == userId);
+                .FirstOrDefaultAsync(x => x.BlogId == blogId && x.UserId == userId);
 
             if (existingReaction != null)
             {
@@ -30,13 +36,14 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 {
                     _appDbContext.BlogReactions.Remove(existingReaction);
                     await _appDbContext.SaveChangesAsync();
-                    return true;
+                    return new Response<string>() { IsSuccess = true, Message = "Upvote removed successfully!" }; ;
                 }
                 else
                 {
                     existingReaction.Type = ReactionType.Upvote;
                     existingReaction.ReactedAt = DateTime.Now;
                     await _appDbContext.SaveChangesAsync();
+                    return new Response<string>() { IsSuccess = true, Message = "Upvote added successfully!", Result = creatorId }; ;
                 }
             }
             else
@@ -50,15 +57,18 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 };
                 await _appDbContext.BlogReactions.AddAsync(newReaction);
                 await _appDbContext.SaveChangesAsync();
-                return true;
+                return new Response<string>() { IsSuccess = true, Message = "Upvote added successfully!", Result = creatorId }; ;
             }
-            return false;
         }
 
-        public async Task<bool> ToggleDownvote(int blogId, string userId)
+        public async Task<Response<string>> ToggleDownvote(int blogId, string userId)
         {
             await CheckUserExists(userId);
-            await CheckBlogExists(blogId);
+            var blog = await _appDbContext.Blogs.FindAsync(blogId);
+            if (blog == null)
+                throw new Exception($"The blog with id {blogId} does not exist.");
+
+            string creatorId = blog.UserId;
 
             var existingReaction = await _appDbContext.BlogReactions
                 .FirstOrDefaultAsync(x => x.BlogId == blogId && x.UserId == userId);
@@ -69,13 +79,15 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 {
                     _appDbContext.BlogReactions.Remove(existingReaction);
                     await _appDbContext.SaveChangesAsync();
-                    return true;
+                    return new Response<string>() { IsSuccess = true, Message = "Downvote removed successfully!" }; ;
+
                 }
                 else
                 {
                     existingReaction.Type = ReactionType.Downvote;
                     existingReaction.ReactedAt = DateTime.Now;
                     await _appDbContext.SaveChangesAsync();
+                    return new Response<string>() { IsSuccess = true, Message = "Downvote added successfully!", Result = creatorId }; ;
                 }
             }
             else
@@ -89,14 +101,13 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 };
                 await _appDbContext.BlogReactions.AddAsync(newReaction);
                 await _appDbContext.SaveChangesAsync();
-                return true;
+                return new Response<string>() { IsSuccess = true, Message = "Downvote added successfully!", Result = creatorId }; ;
             }
-            return false;
         }
 
         public async Task<BlogReactionDTO> GetReactionById(int id)
         {
-            var reaction = await _appDbContext.BlogReactions.Where(x => x.Id == id ).SingleOrDefaultAsync();
+            var reaction = await _appDbContext.BlogReactions.Where(x => x.Id == id).SingleOrDefaultAsync();
 
             if (reaction != null)
                 return MapperlyMapper.BlogReactionToBlogReactionDTO(reaction);
@@ -109,7 +120,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             await CheckUserExists(userId);
             await CheckBlogExists(blogId);
 
-            var reaction = await _appDbContext.BlogReactions.Where(x=> x.BlogId == blogId&&x.UserId==userId).SingleOrDefaultAsync();
+            var reaction = await _appDbContext.BlogReactions.Where(x => x.BlogId == blogId && x.UserId == userId).SingleOrDefaultAsync();
 
             if (reaction != null)
                 return MapperlyMapper.BlogReactionToBlogReactionDTO(reaction);
