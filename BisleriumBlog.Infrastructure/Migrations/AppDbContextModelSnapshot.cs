@@ -91,14 +91,14 @@ namespace BisleriumBlog.Infrastructure.Migrations
                         {
                             Id = "36109bb5-c596-4fee-a016-1d8f8c7496cd",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "57aa7ed1-f2ec-47df-b604-e4299ff3383c",
+                            ConcurrencyStamp = "1e0c4954-fc14-4a92-a81b-6b12d147d249",
                             Email = "manjil.koju.a@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedUserName = "SPADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDcqGPycLDdqXVi8PvRtKDpn3Wcp4SsPnYxQ9uFtM/9cdMlt1ZxUKc+MjO8+yyyDRw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEEgE8rUjQn4XN6pDhYFH8qkQ2SQZWMONa+k3g1PehxXUHiUN8pAFcKMcnvBcBvDyew==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "8dc5dbe6-8018-405d-97ec-29e6ab8407a5",
+                            SecurityStamp = "72590618-2cbe-4a8b-953e-46d9ff0002c4",
                             TwoFactorEnabled = false,
                             UserName = "SpAdmin"
                         });
@@ -134,7 +134,6 @@ namespace BisleriumBlog.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -198,7 +197,6 @@ namespace BisleriumBlog.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -206,7 +204,8 @@ namespace BisleriumBlog.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.HasIndex("BlogId", "UserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("BlogReactions");
                 });
@@ -236,7 +235,6 @@ namespace BisleriumBlog.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -244,7 +242,8 @@ namespace BisleriumBlog.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.HasIndex("BlogId", "UserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Comments");
                 });
@@ -295,7 +294,6 @@ namespace BisleriumBlog.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -303,7 +301,8 @@ namespace BisleriumBlog.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.HasIndex("CommentId", "UserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("CommentReactions");
                 });
@@ -468,9 +467,7 @@ namespace BisleriumBlog.Infrastructure.Migrations
                 {
                     b.HasOne("BisleriumBlog.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -496,9 +493,7 @@ namespace BisleriumBlog.Infrastructure.Migrations
 
                     b.HasOne("BisleriumBlog.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Blog");
 
@@ -515,9 +510,7 @@ namespace BisleriumBlog.Infrastructure.Migrations
 
                     b.HasOne("BisleriumBlog.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Blog");
 
@@ -545,9 +538,7 @@ namespace BisleriumBlog.Infrastructure.Migrations
 
                     b.HasOne("BisleriumBlog.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Comment");
 
