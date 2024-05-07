@@ -118,7 +118,7 @@ namespace BisleriumBlog.API.Controllers
 
 
         [HttpPut("update/{blogId}")]
-        public async Task<IActionResult> UpdateBlog(int blogId, BlogCreateDTO updatedBlog)
+        public async Task<IActionResult> UpdateBlog(int blogId, BlogUpdateDTO updatedBlog)
         {
             try
             {

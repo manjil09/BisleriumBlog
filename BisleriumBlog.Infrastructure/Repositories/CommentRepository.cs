@@ -1,7 +1,9 @@
-﻿using BisleriumBlog.Application.Common;
+﻿using Azure;
+using BisleriumBlog.Application.Common;
 using BisleriumBlog.Application.DTOs.CommentDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
+using BisleriumBlog.Domain.Enums;
 using BisleriumBlog.Infrastructure.Data;
 using BisleriumBlog.Infrastructure.Mapper;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
     public class CommentRepository : ICommentRepository
     {
         private readonly AppDbContext _appDbContext;
+        private const int UpvoteWeightage = 2;
+        private const int DownvoteWeightage = -1;
         public CommentRepository(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
@@ -48,11 +52,16 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<CommentResponseDTO> GetCommentById(int commentId)
         {
-            var comment = await _appDbContext.Comments.Where(x => x.Id == commentId && !x.IsDeleted).SingleOrDefaultAsync();
+            var comment = await _appDbContext.Comments.Where(x => x.Id == commentId && !x.IsDeleted)
+                .Include(x => x.User)
+                .Include(x => x.Reactions).SingleOrDefaultAsync();
 
             if (comment != null && !comment.IsDeleted)
-                return MapperlyMapper.CommentToCommentResponseDTO(comment);
-
+            {
+                var response = MapToCommentResponseDTO(comment);
+                response.UserName = comment.User?.UserName ?? throw new Exception("Comment creater not found.");
+                return response;
+            }
             throw new KeyNotFoundException($"Could not find Comment with the id {commentId}");
         }
 
@@ -64,29 +73,42 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
             IQueryable<Comment> commentQuery = _appDbContext.Comments
                 .Where(x => x.BlogId == blogId && !x.IsDeleted)
-                .OrderByDescending(o => o.UpdatedAt);
+                .Include(x => x.User)
+                .Include (x => x.Reactions)
+                .OrderByDescending(x =>
+                    x.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
+                    x.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage);
+                
 
             var paginatedComments = await PaginatedList<Comment>.CreateAsync(commentQuery, pageIndex ?? 1, pageSize ?? 10);
             int totalPages = paginatedComments.TotalPages;
 
-            var commentDTOs = paginatedComments.Select(MapperlyMapper.CommentToCommentResponseDTO).ToList();
+            var commentDTOs = paginatedComments.Select(MapToCommentResponseDTO).ToList();
 
             return (totalPages, commentDTOs);
         }
 
         public async Task<CommentResponseDTO> GetCommentByUserIdAndBlogId(string userId, int blogId)
         {
-            var comment = await _appDbContext.Comments.Where(x => x.UserId == userId && x.BlogId == blogId && !x.IsDeleted).SingleOrDefaultAsync();
+            var comment = await _appDbContext.Comments.Where(x => x.UserId == userId && x.BlogId == blogId && !x.IsDeleted)
+                .Include(x => x.User)
+                .Include(x => x.Reactions).SingleOrDefaultAsync();
 
             if (comment != null)
-                return MapperlyMapper.CommentToCommentResponseDTO(comment);
+            {
+                var response = MapToCommentResponseDTO(comment);
+                response.UserName = comment.User?.UserName ?? throw new Exception("Comment creater not found.");
+                return response;
+            }
 
             throw new KeyNotFoundException($"Current user has not posted any comment on the blog.");
         }
 
-        public async Task<CommentResponseDTO> UpdateComment(int commentId, CommentCreateDTO updatedComment)
+        public async Task<CommentResponseDTO> UpdateComment(int commentId, CommentUpdateDTO updatedComment)
         {
-            var commentForUpdate = await _appDbContext.Comments.Where(x => x.Id == commentId && !x.IsDeleted).SingleOrDefaultAsync();
+            var commentForUpdate = await _appDbContext.Comments.Where(x => x.Id == commentId && !x.IsDeleted)
+                .Include(x => x.User)
+                .Include(x => x.Reactions).SingleOrDefaultAsync();
             if (commentForUpdate != null)
             {
                 await AddToCommentHistory(commentForUpdate);
@@ -96,7 +118,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
                 await _appDbContext.SaveChangesAsync();
 
-                return MapperlyMapper.CommentToCommentResponseDTO(commentForUpdate);
+                return MapToCommentResponseDTO(commentForUpdate);
             }
 
             throw new KeyNotFoundException($"Could not find Comment with the id {commentId}");
@@ -108,6 +130,15 @@ namespace BisleriumBlog.Infrastructure.Repositories
             commentHistory.CreatedAt = DateTime.Now;
 
             await _appDbContext.CommentHistory.AddAsync(commentHistory);
+        }
+
+        private CommentResponseDTO MapToCommentResponseDTO(Comment comment)
+        {
+            var commentDTO = MapperlyMapper.CommentToCommentResponseDTO(comment);
+            commentDTO.UserName = comment.User?.UserName ?? throw new Exception("Comment creater not found.");
+            commentDTO.TotalDownvotes = comment.Reactions.Where(x => x.Type == ReactionType.Downvote).Count();
+            commentDTO.TotalUpvotes = comment.Reactions.Where(x => x.Type == ReactionType.Upvote).Count();
+            return commentDTO;
         }
     }
 }

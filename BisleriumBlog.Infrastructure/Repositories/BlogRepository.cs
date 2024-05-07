@@ -17,7 +17,6 @@ namespace BisleriumBlog.Infrastructure.Repositories
         private const int UpvoteWeightage = 2;
         private const int DownvoteWeightage = -1;
         private const int CommentWeightage = 1;
-
         public BlogRepository(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
@@ -55,7 +54,8 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<(int, List<BlogResponseDTO>)> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Recency)
         {
-            IQueryable<Blog> blogQuery = _appDbContext.Blogs.Where(x => !x.IsDeleted);
+            IQueryable<Blog> blogQuery = _appDbContext.Blogs.Where(x => !x.IsDeleted).Include(x => x.Reactions)
+                .Include(x => x.Comments);
 
             switch (sortBy)
             {
@@ -70,30 +70,25 @@ namespace BisleriumBlog.Infrastructure.Repositories
                     blogQuery = blogQuery.OrderByDescending(x => x.UpdatedAt); // To sort by descending creation date
                     break;
             }
-
+            blogQuery = blogQuery.Include(x => x.User);
             var paginatedBlogs = await PaginatedList<Blog>.CreateAsync(blogQuery, pageIndex ?? 1, pageSize ?? 10);
             int totalPages = paginatedBlogs.TotalPages;
-
-            var blogDTOs = paginatedBlogs.Select(MapperlyMapper.BlogToBlogResponseDTO).ToList();
-
-            //var blogDTOsWithPopularity = paginatedBlogs.Select(blog =>
-            //{
-            //    var blogDTO = MapperlyMapper.BlogToBlogResponseDTO(blog);
-            //    var popularity = blog.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
-            //                     blog.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
-            //                     blog.Comments.Count(c => !c.IsDeleted) * CommentWeightage;
-            //    return (blogDTO, popularity);
-            //}).ToList();
+            
+            var blogDTOs = paginatedBlogs.Select(MapToBlogResponseDTO).ToList();
 
             return (totalPages, blogDTOs);
         }
 
         public async Task<BlogResponseDTO> GetBlogById(int id)
         {
-            var blog = await _appDbContext.Blogs.Where(x => x.Id == id && !x.IsDeleted).SingleOrDefaultAsync();
+            var blog = await _appDbContext.Blogs.Where(x => x.Id == id && !x.IsDeleted)
+                .Include(x=>x.Reactions)
+                .Include(x=>x.Comments)
+                .Include(x=>x.User)
+                .SingleOrDefaultAsync();
 
             if (blog != null)
-                return MapperlyMapper.BlogToBlogResponseDTO(blog);
+                return MapToBlogResponseDTO(blog);
 
             throw new Exception($"Could not find Blog with the id {id}");
         }
@@ -104,18 +99,24 @@ namespace BisleriumBlog.Infrastructure.Repositories
             if (!userExists)
                 throw new Exception("The user with the provided ID does not exist.");
 
-            var blogs = await _appDbContext.Blogs.Where(x => x.UserId == userId && !x.IsDeleted).ToListAsync();
+            var blogs = await _appDbContext.Blogs.Where(x => x.UserId == userId && !x.IsDeleted)
+                .Include(x => x.Reactions)
+                .Include(x => x.Comments)
+                .Include(x => x.User).ToListAsync();
             if (!blogs.IsNullOrEmpty())
             {
-                var blogDTOs = blogs.Select(MapperlyMapper.BlogToBlogResponseDTO).ToList();
+                var blogDTOs = blogs.Select(MapToBlogResponseDTO).ToList();
                 return blogDTOs;
             }
             throw new Exception("The user has not created any blogs.");
         }
 
-        public async Task<BlogResponseDTO> UpdateBlog(int blogId, BlogCreateDTO updatedBlog, string imageUrl)
+        public async Task<BlogResponseDTO> UpdateBlog(int blogId, BlogUpdateDTO updatedBlog, string imageUrl)
         {
-            var blogForUpdate = await _appDbContext.Blogs.Where(x => x.Id == blogId && !x.IsDeleted).SingleOrDefaultAsync();
+            var blogForUpdate = await _appDbContext.Blogs.Where(x => x.Id == blogId && !x.IsDeleted)
+                .Include(x => x.Reactions)
+                .Include(x => x.Comments)
+                .Include(x => x.User).SingleOrDefaultAsync();
             if (blogForUpdate != null)
             {
                 await AddToBlogHistory(blogForUpdate);
@@ -127,7 +128,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
                 await _appDbContext.SaveChangesAsync();
 
-                return MapperlyMapper.BlogToBlogResponseDTO(blogForUpdate);
+                return MapToBlogResponseDTO(blogForUpdate);
             }
 
             throw new KeyNotFoundException($"Could not find Blog with the id {blogId}");
@@ -140,16 +141,24 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
             await _appDbContext.BlogHistory.AddAsync(blogHistory);
         }
-        public IQueryable<Blog> SortByPopularity(IQueryable<Blog> blogQuery)
+        private IQueryable<Blog> SortByPopularity(IQueryable<Blog> blogQuery)
         {
-            blogQuery = blogQuery.Include(x => x.Reactions)
-                .Include(x => x.Comments)
+            blogQuery = blogQuery
                 .OrderByDescending(x =>
                 x.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
                 x.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
                 x.Comments.Count(c => !c.IsDeleted) * CommentWeightage);
 
             return blogQuery;
+        }
+        private BlogResponseDTO MapToBlogResponseDTO(Blog blog)
+        {
+            var blogDTO = MapperlyMapper.BlogToBlogResponseDTO(blog);
+            blogDTO.UserName = blog.User?.UserName ?? throw new Exception("Blog creater not found.");
+            blogDTO.TotalDownvotes = blog.Reactions.Where(x => x.Type == ReactionType.Downvote).Count();
+            blogDTO.TotalUpvotes = blog.Reactions.Where(x => x.Type == ReactionType.Upvote).Count();
+            blogDTO.TotalComments = blog.Comments.Count();
+            return blogDTO;
         }
     }
 }

@@ -95,7 +95,7 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [HttpPut("update/{commentId}")]
-        public async Task<IActionResult> UpdateComment(int commentId, CommentCreateDTO updatedComment)
+        public async Task<IActionResult> UpdateComment(int commentId, CommentUpdateDTO updatedComment)
         {
             try
             {

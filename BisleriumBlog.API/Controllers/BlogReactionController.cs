@@ -59,20 +59,6 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
-        [HttpGet("getById/{id}")]
-        public async Task<IActionResult> GetReactionById(int id)
-        {
-            try
-            {
-                var reaction = await _blogReactionRepository.GetReactionById(id);
-                return Ok(new Response<BlogReactionDTO> { IsSuccess = true, Message = "Blog Reaction fetch successful.", Result = reaction });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
-            }
-        }
-
         [HttpGet("getReactions/{blogId}")]
         public async Task<IActionResult> GetReactionsByBlogId(int blogId)
         {
