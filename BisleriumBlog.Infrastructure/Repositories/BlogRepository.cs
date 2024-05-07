@@ -76,14 +76,14 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
             var blogDTOs = paginatedBlogs.Select(MapperlyMapper.BlogToBlogResponseDTO).ToList();
 
-            var blogDTOsWithPopularity = paginatedBlogs.Select(blog =>
-            {
-                var blogDTO = MapperlyMapper.BlogToBlogResponseDTO(blog);
-                var popularity = blog.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
-                                 blog.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
-                                 blog.Comments.Count(c => !c.IsDeleted) * CommentWeightage;
-                return (blogDTO, popularity);
-            }).ToList();
+            //var blogDTOsWithPopularity = paginatedBlogs.Select(blog =>
+            //{
+            //    var blogDTO = MapperlyMapper.BlogToBlogResponseDTO(blog);
+            //    var popularity = blog.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
+            //                     blog.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
+            //                     blog.Comments.Count(c => !c.IsDeleted) * CommentWeightage;
+            //    return (blogDTO, popularity);
+            //}).ToList();
 
             return (totalPages, blogDTOs);
         }

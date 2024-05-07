@@ -13,8 +13,8 @@ namespace BisleriumBlog.API.Controllers
     public class BlogReactionController : ControllerBase
     {
         private readonly IBlogReactionRepository _blogReactionRepository;
-        private IHubContext<NotificationHub,INotificationHub> _hubContext;
-        public BlogReactionController(IBlogReactionRepository blogReactionRepository, IHubContext<NotificationHub, INotificationHub> hubContext)
+        private IHubContext<NotificationHub> _hubContext;
+        public BlogReactionController(IBlogReactionRepository blogReactionRepository, IHubContext<NotificationHub> hubContext)
         {
             _blogReactionRepository = blogReactionRepository;
             _hubContext = hubContext;
@@ -27,9 +27,10 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var data = await _blogReactionRepository.ToggleUpvote(blogId,userId);
+                string creatorId = data.Result;
 
-                if (data.Result != null)
-                    await _hubContext.Clients.Client(data.Result).SendNotification("You received an upvote in your blog.");
+                if (creatorId != null)
+                    await _hubContext.Clients.User(creatorId).SendAsync("You received an upvote in your blog.");
                 return Ok(data);
             }
             catch (Exception ex)
@@ -48,7 +49,7 @@ namespace BisleriumBlog.API.Controllers
                 var data = await _blogReactionRepository.ToggleDownvote(blogId, userId);
 
                 if (data.Result != null)
-                    await _hubContext.Clients.Client(data.Result).SendNotification("You received a downvote in your blog.");
+                    await _hubContext.Clients.Client(data.Result).SendAsync("You received a downvote in your blog.");
                 return Ok(data);
             }
             catch (Exception ex)
