@@ -31,8 +31,8 @@ namespace BisleriumBlog.Infrastructure.Data
             //    .OnDelete(DeleteBehavior.NoAction) 
             //    .onUpdate(DeleteBehavior.NoAction);
 
-            //make sure each user can only have 1 reaction and 1 comment on each blog
-            builder.Entity<Comment>().HasIndex(x => new { x.BlogId, x.UserId }).IsUnique();
+            //make sure each user can only have 1 reaction on each blog and comment
+            //builder.Entity<Comment>().HasIndex(x => new { x.BlogId, x.UserId }).IsUnique();
             builder.Entity<BlogReaction>().HasIndex(x => new { x.BlogId, x.UserId }).IsUnique();
             builder.Entity<CommentReaction>().HasIndex(x => new { x.CommentId, x.UserId }).IsUnique();
 
