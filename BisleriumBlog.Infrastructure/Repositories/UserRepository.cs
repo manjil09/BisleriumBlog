@@ -53,6 +53,18 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return new Response<string>() { IsSuccess = true, Message = "User registration successful!" };
         }
 
+        public async Task<Response<UserProfileDTO>> GetProfile(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user != null)
+            {
+                var userProfile = new UserProfileDTO { UserName = user.UserName, UserEmail = user.Email, Role = (await _userManager.GetRolesAsync(user))[0] };
+                return new Response<UserProfileDTO>() { IsSuccess = true, Message = "User profile get successful!", Result = userProfile };
+            }
+            throw new Exception("User not found!");
+        }
+
         public async Task<bool> ValidateUser(UserLoginDTO userForLogin)
         {
             _user = await _userManager.FindByNameAsync(userForLogin.UserName);
@@ -71,7 +83,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             if (existingUserName != null && existingUserName.Id != user.Id)
                 return new Response<string>() { IsSuccess = false, Message = "Username already exists!" };
 
-            var existingUserEmail= await _userManager.FindByEmailAsync(updatedUser.UserEmail);
+            var existingUserEmail = await _userManager.FindByEmailAsync(updatedUser.UserEmail);
             if (existingUserEmail != null && existingUserEmail.Id != user.Id)
                 return new Response<string>() { IsSuccess = false, Message = "Email address already exists!" };
 

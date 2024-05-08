@@ -36,6 +36,20 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
+        [HttpGet("getProfile/{id}")]
+        public async Task<IActionResult> GetProfile(string id)
+        {
+            try
+            {
+                var result = await _userRepository.GetProfile(id);
+                return Ok(result);
+            }catch (Exception ex)
+            {
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
+            }
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpPost("registerAdmin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] UserRegisterDTO userForRegister)
