@@ -23,8 +23,7 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var data = await _commentReactionRepository.ToggleUpvote(commentId, userId);
-                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the comment has been updated." };
-                return Ok(response);
+                return Ok(new Response<CommentReactionResponseDTO> { IsSuccess = true, Message = "Your reaction to the comment has been updated.", Result = data });
             }
             catch (Exception ex)
             {
@@ -40,9 +39,7 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var data = await _commentReactionRepository.ToggleDownvote(commentId, userId);
-                var response = new Response<string> { IsSuccess = true, Message = "Your reaction to the comment has been updated." };
-
-                return Ok(response);
+                return Ok(new Response<CommentReactionResponseDTO> { IsSuccess = true, Message = "Your reaction to the comment has been updated.", Result = data });
             }
             catch (Exception ex)
             {

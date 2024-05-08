@@ -1,10 +1,13 @@
 ﻿using BisleriumBlog.API.SignalRHub;
 using BisleriumBlog.Application.Common;
+using BisleriumBlog.Application.DTOs.BlogDTO;
 using BisleriumBlog.Application.DTOs.BlogReactionDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
+using BisleriumBlog.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System.Reflection.Metadata;
 
 namespace BisleriumBlog.API.Controllers
 {
@@ -27,11 +30,11 @@ namespace BisleriumBlog.API.Controllers
             try
             {
                 var data = await _blogReactionRepository.ToggleUpvote(blogId,userId);
-                string creatorId = data.Result;
+                string creatorId = data.BlogCreatorId;
 
                 if (creatorId != null)
                     await _hubContext.Clients.User(creatorId).SendAsync("You received an upvote in your blog.");
-                return Ok(data);
+                return Ok(new Response<BlogReactionResponseDTO> { IsSuccess = true, Message = "Your reaction to the blog has been updated.", Result = data });
             }
             catch (Exception ex)
             {
@@ -48,9 +51,9 @@ namespace BisleriumBlog.API.Controllers
             {
                 var data = await _blogReactionRepository.ToggleDownvote(blogId, userId);
 
-                if (data.Result != null)
-                    await _hubContext.Clients.Client(data.Result).SendAsync("You received a downvote in your blog.");
-                return Ok(data);
+                if (data.BlogCreatorId != null)
+                    await _hubContext.Clients.Client(data.BlogCreatorId).SendAsync("You received a downvote in your blog.");
+                return Ok(new Response<BlogReactionResponseDTO> { IsSuccess = true, Message = "Your reaction to the blog has been updated.", Result = data });
             }
             catch (Exception ex)
             {

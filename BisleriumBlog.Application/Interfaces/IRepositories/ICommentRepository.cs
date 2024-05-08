@@ -9,7 +9,6 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
         Task<CommentResponseDTO> UpdateComment(int commentId, CommentUpdateDTO updatedComment);
         Task<(int, List<CommentResponseDTO>)> GetCommentsByBlogId(int blogId, int? pageIndex, int? pageSize);
         Task<CommentResponseDTO> GetCommentById(int commentId);
-        Task<CommentResponseDTO> GetCommentByUserIdAndBlogId(string userId, int blogId);
         Task<bool> DeleteComment(int commentId);
     }
 }

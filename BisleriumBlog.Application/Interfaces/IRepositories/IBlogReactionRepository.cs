@@ -5,8 +5,8 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
 {
     public interface IBlogReactionRepository
     {
-        Task<Response<string>> ToggleUpvote(int blogId, string userId);
-        Task<Response<string>> ToggleDownvote(int blogId, string userId);
+        Task<BlogReactionResponseDTO> ToggleUpvote(int blogId, string userId);
+        Task<BlogReactionResponseDTO> ToggleDownvote(int blogId, string userId);
         Task<BlogReactionDTO> GetReactionById(int blogReactionId);
         Task<(int totalUpvotes, int totalDownvotes, List<BlogReactionDTO>)> GetReactionsByBlogId(int blogId);
         Task<BlogReactionDTO> GetReactionByUserIdAndBlogId(string userId, int blogId);

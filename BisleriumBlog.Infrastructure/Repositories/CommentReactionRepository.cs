@@ -1,4 +1,5 @@
-﻿using BisleriumBlog.Application.DTOs.CommentReactionDTO;
+﻿using BisleriumBlog.Application.DTOs.BlogReactionDTO;
+using BisleriumBlog.Application.DTOs.CommentReactionDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Domain.Enums;
@@ -55,11 +56,18 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return (totalUpvotes, totalDownvotes, reactionDTOs);
         }
 
-        public async Task<bool> ToggleDownvote(int commentId, string userId)
+        public async Task<CommentReactionResponseDTO> ToggleDownvote(int commentId, string userId)
         {
             bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
             if (!userExists)
                 throw new Exception("The user with the provided ID does not exist.");
+
+
+            var comment = await _appDbContext.Comments.FindAsync(commentId);
+            if (comment == null)
+                throw new Exception($"The blog with id {commentId} does not exist.");
+
+            string creatorId = comment.UserId;
 
             var existingReaction = await _appDbContext.CommentReactions
                 .FirstOrDefaultAsync(x => x.CommentId == commentId && x.UserId == userId);
@@ -70,13 +78,26 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 {
                     _appDbContext.CommentReactions.Remove(existingReaction);
                     await _appDbContext.SaveChangesAsync();
-                    return true;
+                    return new CommentReactionResponseDTO
+                    {
+                        TotalUpvotes = CalculateTotalUpvotes(commentId),
+                        TotalDownvotes = CalculateTotalDownvotes(commentId),
+                        CommentCreatorId = creatorId,
+                        Type = existingReaction.Type
+                    };
                 }
                 else
                 {
                     existingReaction.Type = ReactionType.Downvote;
                     existingReaction.ReactedAt = DateTime.Now;
                     await _appDbContext.SaveChangesAsync();
+                    return new CommentReactionResponseDTO
+                    {
+                        TotalUpvotes = CalculateTotalUpvotes(commentId),
+                        TotalDownvotes = CalculateTotalDownvotes(commentId),
+                        CommentCreatorId = creatorId,
+                        Type = existingReaction.Type
+                    };
                 }
             }
             else
@@ -90,16 +111,27 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 };
                 await _appDbContext.CommentReactions.AddAsync(newReaction);
                 await _appDbContext.SaveChangesAsync();
-                return true;
+                return new CommentReactionResponseDTO
+                {
+                    TotalUpvotes = CalculateTotalUpvotes(commentId),
+                    TotalDownvotes = CalculateTotalDownvotes(commentId),
+                    CommentCreatorId = creatorId,
+                    Type = newReaction.Type
+                };
             }
-            return false;
         }
 
-        public async Task<bool> ToggleUpvote(int commentId, string userId)
+        public async Task<CommentReactionResponseDTO> ToggleUpvote(int commentId, string userId)
         {
             bool userExists = await _appDbContext.Users.AnyAsync(x => x.Id == userId);
             if (!userExists)
                 throw new Exception("The user with the provided ID does not exist.");
+
+            var comment = await _appDbContext.Comments.FindAsync(commentId);
+            if (comment == null)
+                throw new Exception($"The blog with id {commentId} does not exist.");
+
+            string creatorId = comment.UserId;
 
             var existingReaction = await _appDbContext.CommentReactions
                 .FirstOrDefaultAsync(x => x.CommentId == commentId && x.UserId == userId);
@@ -110,13 +142,26 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 {
                     _appDbContext.CommentReactions.Remove(existingReaction);
                     await _appDbContext.SaveChangesAsync();
-                    return true;
+                    return new CommentReactionResponseDTO
+                    {
+                        TotalUpvotes = CalculateTotalUpvotes(commentId),
+                        TotalDownvotes = CalculateTotalDownvotes(commentId),
+                        CommentCreatorId = creatorId,
+                        Type = existingReaction.Type
+                    };
                 }
                 else
                 {
                     existingReaction.Type = ReactionType.Upvote;
                     existingReaction.ReactedAt = DateTime.Now;
                     await _appDbContext.SaveChangesAsync();
+                    return new CommentReactionResponseDTO
+                    {
+                        TotalUpvotes = CalculateTotalUpvotes(commentId),
+                        TotalDownvotes = CalculateTotalDownvotes(commentId),
+                        CommentCreatorId = creatorId,
+                        Type = existingReaction.Type
+                    };
                 }
             }
             else
@@ -130,9 +175,24 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 };
                 await _appDbContext.CommentReactions.AddAsync(newReaction);
                 await _appDbContext.SaveChangesAsync();
-                return true;
+                return new CommentReactionResponseDTO
+                {
+                    TotalUpvotes = CalculateTotalUpvotes(commentId),
+                    TotalDownvotes = CalculateTotalDownvotes(commentId),
+                    CommentCreatorId = creatorId,
+                    Type = newReaction.Type
+                };
             }
-            return false;
+        }
+
+        private int CalculateTotalUpvotes(int commentId)
+        {
+            return _appDbContext.BlogReactions.Count(x => x.BlogId == commentId && x.Type == ReactionType.Upvote);
+        }
+
+        private int CalculateTotalDownvotes(int commentId)
+        {
+            return _appDbContext.BlogReactions.Count(x => x.BlogId == commentId && x.Type == ReactionType.Downvote);
         }
     }
 }

@@ -94,6 +94,7 @@ namespace BisleriumBlog.API.Controllers
         //    }
         //}
 
+        [Authorize(Roles = "User")]
         [HttpPut("update/{commentId}")]
         public async Task<IActionResult> UpdateComment(int commentId, CommentUpdateDTO updatedComment)
         {
@@ -108,6 +109,7 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
+        [Authorize(Roles = "User")]
         [HttpDelete("delete/{commentId}")]
         public async Task<IActionResult> DeleteBlog(int commentId)
         {

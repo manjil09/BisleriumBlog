@@ -75,6 +75,7 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("updateUser/{id}")]
         public async Task<IActionResult> UpdateUser(string id, UserUpdateDTO updatedUser)
         {
@@ -93,6 +94,7 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("changePassword")]
         public async Task<IActionResult> ChangePassword(ChangePasswordDTO model)
         {

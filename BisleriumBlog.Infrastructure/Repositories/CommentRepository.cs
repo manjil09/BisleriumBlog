@@ -88,22 +88,6 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return (totalPages, commentDTOs);
         }
 
-        public async Task<CommentResponseDTO> GetCommentByUserIdAndBlogId(string userId, int blogId)
-        {
-            var comment = await _appDbContext.Comments.Where(x => x.UserId == userId && x.BlogId == blogId && !x.IsDeleted)
-                .Include(x => x.User)
-                .Include(x => x.Reactions).SingleOrDefaultAsync();
-
-            if (comment != null)
-            {
-                var response = MapToCommentResponseDTO(comment);
-                response.UserName = comment.User?.UserName ?? throw new Exception("Comment creater not found.");
-                return response;
-            }
-
-            throw new KeyNotFoundException($"Current user has not posted any comment on the blog.");
-        }
-
         public async Task<CommentResponseDTO> UpdateComment(int commentId, CommentUpdateDTO updatedComment)
         {
             var commentForUpdate = await _appDbContext.Comments.Where(x => x.Id == commentId && !x.IsDeleted)

@@ -81,6 +81,7 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("getByMonth")]
         public async Task<IActionResult> GetAllBlogsByMonth(int month, int year, int? pageIndex, int? pageSize, string sortBy = "popularity", bool isAscending = false)
         {
@@ -148,7 +149,7 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
-
+        [Authorize(Roles = "User")]
         [HttpPut("update/{blogId}")]
         public async Task<IActionResult> UpdateBlog(int blogId, BlogUpdateDTO updatedBlog)
         {
@@ -174,6 +175,7 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
+        [Authorize(Roles = "User")]
         [HttpDelete("delete/{blogId}")]
         public async Task<IActionResult> DeleteBlog(int blogId)
         {
