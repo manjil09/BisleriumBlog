@@ -1,4 +1,5 @@
-﻿using BisleriumBlog.Application.DTOs.UserDTO;
+﻿using BisleriumBlog.Application.Common;
+using BisleriumBlog.Application.DTOs.UserDTO;
 using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -50,7 +51,7 @@ namespace BisleriumBlog.API.Controllers
             return BadRequest("Invalid username or password!");
         }
 
-        [HttpPut("UpdateUser/{id}")]
+        [HttpPut("updateUser/{id}")]
         public async Task<IActionResult> UpdateUser(string id, UserUpdateDTO updatedUser)
         {
             var result = await _userRepository.UpdateUser(id, updatedUser);
@@ -58,6 +59,40 @@ namespace BisleriumBlog.API.Controllers
             if (!result.IsSuccess)
                 return BadRequest(result.Message);
             return Ok(result.Message);
+        }
+
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO model)
+        {
+            try
+            {
+                var response = await _userRepository.ChangePassword(model.UserId, model.CurrentPassword, model.NewPassword);
+                if (response.IsSuccess)
+                    return Ok(response);
+                else
+                    return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string> { IsSuccess = false, Message = $"An error occurred: {ex.Message}" });
+            }
+        }
+
+        [HttpPost("forgotPassword")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model)
+        {
+            try
+            {
+                var response = await _userRepository.ForgotPassword(model.Email, model.NewPassword);
+                if (response.IsSuccess)
+                    return Ok(response);
+                else
+                    return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string> { IsSuccess = false, Message = $"An error occurred: {ex.Message}" });
+            }
         }
     }
 }

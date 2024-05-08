@@ -85,6 +85,20 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return new Response<string>() { IsSuccess = true, Message = "User details updated successfully!" };
         }
 
+        public async Task<Response<string>> ForgotPassword(string email, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return new Response<string> { IsSuccess = false, Message = "User not found!" };
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            if (!result.Succeeded)
+                return new Response<string> { IsSuccess = false, Message = "Failed to reset password!" };
+
+            return new Response<string> { IsSuccess = true, Message = "Password reset successfully!" };
+        }
+
         public async Task<Response<string>> ChangePassword(string userId, string currentPassword, string newPassword)
         {
             var existingUser = await _userManager.FindByIdAsync(userId);

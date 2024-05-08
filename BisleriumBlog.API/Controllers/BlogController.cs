@@ -139,7 +139,7 @@ namespace BisleriumBlog.API.Controllers
             catch (Exception ex)
             {
                 string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
-                return BadRequest(new Response<string> { IsSuccess = false, Message = message+"jfjfjfj" });
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
             }
         }
 

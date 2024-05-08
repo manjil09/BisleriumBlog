@@ -10,6 +10,7 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
         Task<bool> ValidateUser(UserLoginDTO userForLogin);
         Task<Response<string>> CreateToken();
         Task<Response<string>> UpdateUser(string id, UserUpdateDTO updatedUser);
+        Task<Response<string>> ForgotPassword(string email, string newPassword);
         Task<Response<string>> ChangePassword(string userId, string currentPassword, string newPassword);
     }
 }
