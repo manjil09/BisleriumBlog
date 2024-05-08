@@ -49,32 +49,21 @@ namespace BisleriumBlog.API.Controllers
         }
 
         [HttpGet("getAll")]
-        public async Task<IActionResult> GetAllBlogs(int? pageIndex, int? pageSize, string sortBy = "recency")
+        public async Task<IActionResult> GetAllBlogs(int? pageIndex, int? pageSize, string sortBy = "recency", bool isAscending = false)
         {
+            try { 
             var sortByEnum = Enum.TryParse(sortBy, true, out SortType sortByValue) ? sortByValue : SortType.Recency;
 
             if (pageIndex < 1 || pageSize < 1)
-                return BadRequest(new Response<string>
-                {
-                    IsSuccess = false,
-                    Message = "Page index and page size must be greater than 0."
-                });
+                return BadRequest(new Response<string> { IsSuccess = false, Message = "Page index and page size must be greater than 0." });
 
-            var (totalPages, blogs) = await _blogRepository.GetAllBlogs(pageIndex, pageSize, sortByEnum);
+            var (totalPages, blogs) = await _blogRepository.GetAllBlogs(pageIndex, pageSize, sortByEnum, isAscending);
 
             if (blogs == null)
-                return NotFound(new Response<string>
-                {
-                    IsSuccess = false,
-                    Message = "Couldn't fetch any Blogs."
-                });
+                return NotFound(new Response<string> { IsSuccess = false, Message = "Couldn't fetch any Blogs." });
 
             if (totalPages == 0)
-                return Ok(new Response<string>
-                {
-                    IsSuccess = true,
-                    Message = "There are no blogs posted yet."
-                });
+                return Ok(new Response<string> { IsSuccess = true, Message = "There are no blogs posted yet." });
 
             var response = new Response<dynamic>
             {
@@ -83,9 +72,52 @@ namespace BisleriumBlog.API.Controllers
                 Result = new { TotalPages = totalPages, Blogs = blogs }
             };
 
-            Response.Headers.Append("X-Total-Pages", totalPages.ToString());
-
             return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
+            }
+        }
+
+        [HttpGet("getByMonth")]
+        public async Task<IActionResult> GetAllBlogsByMonth(int month, int year, int? pageIndex, int? pageSize, string sortBy = "popularity", bool isAscending = false)
+        {
+            try
+            {
+                var sortByEnum = Enum.TryParse(sortBy, true, out SortType sortByValue) ? sortByValue : SortType.Recency;
+                if (month < 1 || month > 12 || year < 1)
+                    return BadRequest(new Response<string> { IsSuccess = false, Message = "Invalid month or year." });
+                if (pageIndex < 1 || pageSize < 1)
+                    return BadRequest(new Response<string> { IsSuccess = false, Message = "Page index and page size must be greater than 0." });
+
+                var (totalPages, blogs) = await _blogRepository.GetAllBlogsByMonth(month, year, pageIndex, pageSize, sortByEnum, isAscending);
+
+                if (blogs == null)
+                    return NotFound(new Response<string> { IsSuccess = false, Message = "Couldn't fetch any Blogs." });
+
+                if (totalPages == 0)
+                    return Ok(new Response<string>
+                    {
+                        IsSuccess = true,
+                        Message = "There are no blogs posted yet."
+                    });
+
+                var response = new Response<dynamic>
+                {
+                    IsSuccess = true,
+                    Message = "Blogs retrieved successfully.",
+                    Result = new { TotalPages = totalPages, Blogs = blogs }
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
+            }
         }
 
         [HttpGet("getById/{blogId}")]
@@ -133,7 +165,6 @@ namespace BisleriumBlog.API.Controllers
                 var response = new Response<BlogResponseDTO> { IsSuccess = true, Message = "Blog updated succesfully.", Result = data };
                 if (response.IsSuccess)
                     await UploadImage(imageFile, path);
-
                 return Ok(response);
             }
             catch (Exception ex)
@@ -146,11 +177,19 @@ namespace BisleriumBlog.API.Controllers
         [HttpDelete("delete/{blogId}")]
         public async Task<IActionResult> DeleteBlog(int blogId)
         {
-            var success = await _blogRepository.DeleteBlog(blogId);
-            if (success)
-                return Ok(new Response<bool> { IsSuccess = true, Message = "Blog deleted succesfully." });
+            try
+            {
+                var success = await _blogRepository.DeleteBlog(blogId);
+                if (success)
+                    return Ok(new Response<bool> { IsSuccess = true, Message = "Blog deleted succesfully." });
 
-            return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find Blog with the id {blogId}" });
+                return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find Blog with the id {blogId}" });
+            }
+            catch (Exception ex)
+            {
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
+            }
         }
 
         private async Task UploadImage(IFormFile imageFile, string path)

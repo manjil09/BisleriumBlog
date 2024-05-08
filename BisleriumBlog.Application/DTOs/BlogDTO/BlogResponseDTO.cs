@@ -11,6 +11,7 @@
         public int TotalUpvotes { get; set; }
         public int TotalDownvotes { get; set; }
         public int TotalComments{ get; set; }
+        public int Popularity { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 }

@@ -52,7 +52,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<(int, List<BlogResponseDTO>)> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Recency)
+        public async Task<(int, List<BlogResponseDTO>)> GetAllBlogs(int? pageIndex, int? pageSize, SortType? sortBy = SortType.Recency, bool isAscending = false)
         {
             IQueryable<Blog> blogQuery = _appDbContext.Blogs.Where(x => !x.IsDeleted).Include(x => x.Reactions)
                 .Include(x => x.Comments);
@@ -60,20 +60,55 @@ namespace BisleriumBlog.Infrastructure.Repositories
             switch (sortBy)
             {
                 case SortType.Popularity:
-                    blogQuery = SortByPopularity(blogQuery);
+                    blogQuery = SortByPopularity(blogQuery, isAscending);
                     break;
                 case SortType.Random:
                     blogQuery = blogQuery.OrderBy(x => Guid.NewGuid()); // To sort randomly
                     break;
                 case SortType.Recency:
                 default:
-                    blogQuery = blogQuery.OrderByDescending(x => x.UpdatedAt); // To sort by descending creation date
+                    if (isAscending)
+                        blogQuery = blogQuery.OrderBy(x => x.UpdatedAt); // To sort by ascending creation date
+                    else
+                        blogQuery = blogQuery.OrderByDescending(x => x.UpdatedAt); // To sort by descending creation date
                     break;
             }
             blogQuery = blogQuery.Include(x => x.User);
             var paginatedBlogs = await PaginatedList<Blog>.CreateAsync(blogQuery, pageIndex ?? 1, pageSize ?? 10);
             int totalPages = paginatedBlogs.TotalPages;
-            
+
+            var blogDTOs = paginatedBlogs.Select(MapToBlogResponseDTO).ToList();
+
+            return (totalPages, blogDTOs);
+        }
+
+
+        public async Task<(int, List<BlogResponseDTO>)> GetAllBlogsByMonth(int month, int year, int? pageIndex, int? pageSize, SortType? sortBy = SortType.Recency, bool isAscending = false)
+        {
+            IQueryable<Blog> blogQuery = _appDbContext.Blogs.Where(x => !x.IsDeleted && x.CreatedAt.Month == month && x.CreatedAt.Year == year)
+                .Include(x => x.Reactions)
+                .Include(x => x.Comments);
+
+            switch (sortBy)
+            {
+                case SortType.Popularity:
+                    blogQuery = SortByPopularity(blogQuery, isAscending);
+                    break;
+                case SortType.Random:
+                    blogQuery = blogQuery.OrderBy(x => Guid.NewGuid()); // To sort randomly
+                    break;
+                case SortType.Recency:
+                default:
+                    if (isAscending)
+                        blogQuery = blogQuery.OrderBy(x => x.UpdatedAt); // To sort by ascending creation date
+                    else
+                        blogQuery = blogQuery.OrderByDescending(x => x.UpdatedAt); // To sort by descending creation date
+                    break;
+            }
+            blogQuery = blogQuery.Include(x => x.User);
+            var paginatedBlogs = await PaginatedList<Blog>.CreateAsync(blogQuery, pageIndex ?? 1, pageSize ?? 10);
+            int totalPages = paginatedBlogs.TotalPages;
+
             var blogDTOs = paginatedBlogs.Select(MapToBlogResponseDTO).ToList();
 
             return (totalPages, blogDTOs);
@@ -82,9 +117,9 @@ namespace BisleriumBlog.Infrastructure.Repositories
         public async Task<BlogResponseDTO> GetBlogById(int id)
         {
             var blog = await _appDbContext.Blogs.Where(x => x.Id == id && !x.IsDeleted)
-                .Include(x=>x.Reactions)
-                .Include(x=>x.Comments)
-                .Include(x=>x.User)
+                .Include(x => x.Reactions)
+                .Include(x => x.Comments)
+                .Include(x => x.User)
                 .SingleOrDefaultAsync();
 
             if (blog != null)
@@ -141,15 +176,28 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
             await _appDbContext.BlogHistory.AddAsync(blogHistory);
         }
-        private IQueryable<Blog> SortByPopularity(IQueryable<Blog> blogQuery)
+        private IQueryable<Blog> SortByPopularity(IQueryable<Blog> blogQuery, bool isAscending)
         {
-            blogQuery = blogQuery
-                .OrderByDescending(x =>
-                x.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
-                x.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
-                x.Comments.Count(c => !c.IsDeleted) * CommentWeightage);
+            if (isAscending)
+            {
+                blogQuery = blogQuery
+                    .OrderBy(x =>
+                    x.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
+                    x.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
+                    x.Comments.Count(c => !c.IsDeleted) * CommentWeightage);
 
-            return blogQuery;
+                return blogQuery;
+            }
+            else
+            {
+                blogQuery = blogQuery
+                    .OrderByDescending(x =>
+                    x.Reactions.Count(r => r.Type == ReactionType.Upvote) * UpvoteWeightage +
+                    x.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage +
+                    x.Comments.Count(c => !c.IsDeleted) * CommentWeightage);
+
+                return blogQuery;
+            }
         }
         private BlogResponseDTO MapToBlogResponseDTO(Blog blog)
         {
@@ -158,6 +206,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
             blogDTO.TotalDownvotes = blog.Reactions.Where(x => x.Type == ReactionType.Downvote).Count();
             blogDTO.TotalUpvotes = blog.Reactions.Where(x => x.Type == ReactionType.Upvote).Count();
             blogDTO.TotalComments = blog.Comments.Count();
+            blogDTO.Popularity = blogDTO.TotalUpvotes * UpvoteWeightage + blogDTO.TotalDownvotes * DownvoteWeightage + blogDTO.TotalComments * CommentWeightage;
             return blogDTO;
         }
     }

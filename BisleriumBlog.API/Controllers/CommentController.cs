@@ -111,11 +111,19 @@ namespace BisleriumBlog.API.Controllers
         [HttpDelete("delete/{commentId}")]
         public async Task<IActionResult> DeleteBlog(int commentId)
         {
-            var success = await _commentRepository.DeleteComment(commentId);
-            if (success)
-                return Ok(new Response<bool> { IsSuccess = true, Message = "Comment deleted succesfully." });
+            try
+            {
+                var success = await _commentRepository.DeleteComment(commentId);
+                if (success)
+                    return Ok(new Response<bool> { IsSuccess = true, Message = "Comment deleted succesfully." });
 
-            return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find Comment with the id {commentId}" });
+                return NotFound(new Response<string> { IsSuccess = false, Message = $"Could not find Comment with the id {commentId}" });
+            }
+            catch (Exception ex)
+            {
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
+            }
         }
     }
 }
