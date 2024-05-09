@@ -7,7 +7,7 @@ namespace BisleriumBlog.Application.Interfaces.IRepositories
     public interface IUserRepository
     {
         Task<Response<string>> Register(UserRegisterDTO userForRegister, UserRole role = UserRole.User);
-        Task<Response<List<UserProfileDTO>>> GetAllAdmin();
+        Task<Response<List<UserProfileDTO>>> GetAllUsers();
         Task<Response<UserProfileDTO>> GetProfile(string id);
         Task<bool> ValidateUser(UserLoginDTO userForLogin);
         Task<Response<string>> CreateToken();

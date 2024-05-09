@@ -4,6 +4,7 @@ using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Entities;
 using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -25,7 +26,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
         }
         public async Task<Response<List<UserProfileDTO>>> GetAllAdmin()
         {
-            var adminRoleName = Enum.GetName(typeof(UserRole), UserRole.Admin); 
+            var adminRoleName = Enum.GetName(typeof(UserRole), UserRole.Admin);
 
             var adminUsers = await _userManager.GetUsersInRoleAsync(adminRoleName);
 
@@ -36,14 +37,30 @@ namespace BisleriumBlog.Infrastructure.Repositories
                 Role = adminRoleName
             }).ToList();
 
-            return new Response<List<UserProfileDTO>>
-            {
-                Result = adminUserDTOs,
-                IsSuccess = true,
-                Message = "Admin users retrieved successfully"
-            };
+            return new Response<List<UserProfileDTO>> { Result = adminUserDTOs, IsSuccess = true, Message = "Admin users retrieved successfully" };
         }
 
+        public async Task<Response<List<UserProfileDTO>>> GetAllUsers()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            var userDTOs = new List<UserProfileDTO>();
+
+            foreach (var user in users)
+            {
+                var role = (await _userManager.GetRolesAsync(user))[0];
+
+                var userDTO = new UserProfileDTO
+                {
+                    UserEmail = user.Email,
+                    UserName = user.UserName,
+                    Role = role
+                };
+
+                userDTOs.Add(userDTO);
+            }
+
+            return new Response<List<UserProfileDTO>> { Result = userDTOs, IsSuccess = true, Message = "Admin users retrieved successfully" };
+        }
         public async Task<Response<string>> Register(UserRegisterDTO userForRegister, UserRole role = UserRole.User)
         {
             var existingUser = await _userManager.FindByNameAsync(userForRegister.UserName);

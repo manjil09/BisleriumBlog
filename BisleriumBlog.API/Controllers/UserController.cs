@@ -36,12 +36,12 @@ namespace BisleriumBlog.API.Controllers
         }
 
 
-        [HttpGet("getAllAdmin")]
-        public async Task<IActionResult> GetAllAdmin()
+        [HttpGet("getAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
         {
             try
             {
-                var result = await _userRepository.GetAllAdmin();
+                var result = await _userRepository.GetAllUsers();
                 return Ok(result);
             }
             catch (Exception ex)
