@@ -23,6 +23,26 @@ namespace BisleriumBlog.Infrastructure.Repositories
             this._userManager = userManager;
             this._configuration = configuration;
         }
+        public async Task<Response<List<UserProfileDTO>>> GetAllAdmin()
+        {
+            var adminRoleName = Enum.GetName(typeof(UserRole), UserRole.Admin); 
+
+            var adminUsers = await _userManager.GetUsersInRoleAsync(adminRoleName);
+
+            var adminUserDTOs = adminUsers.Select(u => new UserProfileDTO
+            {
+                UserEmail = u.Email,
+                UserName = u.UserName,
+                Role = adminRoleName
+            }).ToList();
+
+            return new Response<List<UserProfileDTO>>
+            {
+                Result = adminUserDTOs,
+                IsSuccess = true,
+                Message = "Admin users retrieved successfully"
+            };
+        }
 
         public async Task<Response<string>> Register(UserRegisterDTO userForRegister, UserRole role = UserRole.User)
         {

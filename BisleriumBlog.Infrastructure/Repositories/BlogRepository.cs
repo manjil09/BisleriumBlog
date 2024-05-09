@@ -85,7 +85,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
 
         public async Task<(int, List<BlogResponseDTO>)> GetAllBlogsByMonth(int month, int year, int? pageIndex, int? pageSize, SortType? sortBy = SortType.Recency, bool isAscending = false)
         {
-            IQueryable<Blog> blogQuery = _appDbContext.Blogs.Where(x => !x.IsDeleted && x.CreatedAt.Month == month && x.CreatedAt.Year == year)
+            IQueryable<Blog> blogQuery = _appDbContext.Blogs.Where(x => !x.IsDeleted && x.UpdatedAt.Month == month && x.UpdatedAt.Year == year)
                 .Include(x => x.Reactions)
                 .Include(x => x.Comments);
 

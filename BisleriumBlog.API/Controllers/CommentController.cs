@@ -79,21 +79,6 @@ namespace BisleriumBlog.API.Controllers
             }
         }
 
-        //[Authorize(Roles = "User")]
-        //[HttpGet("getUserComments/{blogId}/{userId}")]
-        //public async Task<IActionResult> GetCommentByUserIdAndBlogId(string userId, int blogId)
-        //{
-        //    try
-        //    {
-        //        var userComment = await _commentRepository.GetCommentByUserIdAndBlogId(userId, blogId);
-        //        return Ok(new Response<CommentResponseDTO> { IsSuccess = true, Message = "User comment on the blog fetched successfully.", Result = userComment });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return NotFound(new Response<string> { IsSuccess = false, Message = ex.Message });
-        //    }
-        //}
-
         [Authorize(Roles = "User")]
         [HttpPut("update/{commentId}")]
         public async Task<IActionResult> UpdateComment(int commentId, CommentUpdateDTO updatedComment)

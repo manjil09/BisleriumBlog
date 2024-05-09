@@ -83,7 +83,7 @@ namespace BisleriumBlog.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("getByMonth")]
-        public async Task<IActionResult> GetAllBlogsByMonth(int month, int year, int? pageIndex, int? pageSize, string sortBy = "popularity", bool isAscending = false)
+        public async Task<IActionResult> GetAllBlogsByMonth(int? pageIndex, int? pageSize, string sortBy = "popularity", bool isAscending = false, int month = 1, int year = 1)
         {
             try
             {

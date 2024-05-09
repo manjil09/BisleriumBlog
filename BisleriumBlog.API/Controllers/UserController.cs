@@ -4,7 +4,6 @@ using BisleriumBlog.Application.Interfaces.IRepositories;
 using BisleriumBlog.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace BisleriumBlog.API.Controllers
 {
@@ -28,6 +27,22 @@ namespace BisleriumBlog.API.Controllers
                 if (!result.IsSuccess)
                     return BadRequest(result.Message);
                 return Ok(result.Message);
+            }
+            catch (Exception ex)
+            {
+                string message = (ex.InnerException != null) ? ex.InnerException.Message : ex.Message;
+                return BadRequest(new Response<string> { IsSuccess = false, Message = message });
+            }
+        }
+
+
+        [HttpGet("getAllAdmin")]
+        public async Task<IActionResult> GetAllAdmin()
+        {
+            try
+            {
+                var result = await _userRepository.GetAllAdmin();
+                return Ok(result);
             }
             catch (Exception ex)
             {
