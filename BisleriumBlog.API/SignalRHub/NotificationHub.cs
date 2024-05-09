@@ -3,21 +3,24 @@ using System.Security.Claims;
 
 namespace BisleriumBlog.API.SignalRHub
 {
-    public class NotificationHub: Hub<INotificationHub>
+    public class NotificationHub : Hub
     {
         private Dictionary<string, List<string>> ConnectedClient = new Dictionary<string, List<string>>();
+
         public override Task OnConnectedAsync()
         {
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var connectionId = Context.ConnectionId;
 
-            if (!ConnectedClient.ContainsKey(userId))
+            if (userId != null)
             {
-                ConnectedClient[userId] = new List<string>();
+                if (!ConnectedClient.ContainsKey(userId))
+                {
+                    ConnectedClient[userId] = new List<string>();
+                }
+
+                ConnectedClient[userId].Add(connectionId);
             }
-
-            ConnectedClient[userId].Add(connectionId);
-
             return base.OnConnectedAsync();
         }
 
@@ -26,7 +29,7 @@ namespace BisleriumBlog.API.SignalRHub
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var connectionId = Context.ConnectionId;
 
-            if (ConnectedClient.ContainsKey(userId))
+            if (userId != null && ConnectedClient.ContainsKey(userId))
             {
                 ConnectedClient[userId].Remove(connectionId);
 
@@ -35,7 +38,6 @@ namespace BisleriumBlog.API.SignalRHub
                     ConnectedClient.Remove(userId);
                 }
             }
-
             return base.OnDisconnectedAsync(exception);
         }
 
@@ -45,7 +47,7 @@ namespace BisleriumBlog.API.SignalRHub
             {
                 foreach (var connectionId in ConnectedClient[userId])
                 {
-                    //await Clients.Client(connectionId).SendAsync("ReceiveNotification", message);
+                    await Clients.Client(connectionId).SendAsync("ReceiveNotification", message);
                 }
             }
         }

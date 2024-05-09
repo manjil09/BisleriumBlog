@@ -80,7 +80,7 @@ namespace BisleriumBlog.Infrastructure.Repositories
                     x.Reactions.Count(r => r.Type == ReactionType.Downvote) * DownvoteWeightage);
                 
 
-            var paginatedComments = await PaginatedList<Comment>.CreateAsync(commentQuery, pageIndex ?? 1, pageSize ?? 10);
+            var paginatedComments = await PaginatedList<Comment>.CreateAsync(commentQuery, pageIndex ?? 1, pageSize ?? 100);
             int totalPages = paginatedComments.TotalPages;
 
             var commentDTOs = paginatedComments.Select(MapToCommentResponseDTO).ToList();

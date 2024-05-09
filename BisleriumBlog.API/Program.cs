@@ -72,6 +72,11 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
+//app.UseCors(builder =>
+//{
+//    builder.WithOrigins("http://localhost:3000")
+//    .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+//});
 app.MapHub<NotificationHub>("/notification");
 app.UseCors("reactApp");
 app.MapControllers();

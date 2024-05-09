@@ -58,10 +58,11 @@ namespace BisleriumBlog.API.Controllers
                         Message = "Couldn't fetch any comments."
                     });
                 if (totalPages == 0)
-                    return Ok(new Response<string>
+                    return Ok(new Response<dynamic>
                     {
                         IsSuccess = true,
-                        Message = "There are currently no comments on this blog."
+                        Message = "There are currently no comments on this blog.",
+                    Result = new { TotalPages = totalPages, Comments = comments }
                     });
 
                 var response = new Response<dynamic>
