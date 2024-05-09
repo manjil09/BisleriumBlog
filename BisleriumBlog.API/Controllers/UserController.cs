@@ -59,8 +59,8 @@ namespace BisleriumBlog.API.Controllers
                 var result = await _userRepository.Register(userForRegister, UserRole.Admin);
 
                 if (!result.IsSuccess)
-                    return BadRequest(result.Message);
-                return Ok(result.Message);
+                    return BadRequest(result);
+                return Ok(result);
             }
             catch (Exception ex)
             {
