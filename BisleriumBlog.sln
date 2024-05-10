@@ -7,11 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BisleriumBlog.Domain", "Bis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BisleriumBlog.Infrastructure", "BisleriumBlog.Infrastructure\BisleriumBlog.Infrastructure.csproj", "{64D9173A-CEF6-4AFD-87DC-E4666E8DC253}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BisleriumBlog.Application", "BisleriumBlog.Application\BisleriumBlog.Application.csproj", "{9603E43F-7FD6-49A3-9E39-EC48104713B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BisleriumBlog.Application", "BisleriumBlog.Application\BisleriumBlog.Application.csproj", "{9603E43F-7FD6-49A3-9E39-EC48104713B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BisleriumBlog.API", "BisleriumBlog.API\BisleriumBlog.API.csproj", "{EAC0125E-8D4E-41BD-9C39-176E2142E893}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BisleriumBlog.UI", "BisleriumBlog.UI\BisleriumBlog.UI.csproj", "{798379F8-3AC5-47B2-BE29-6A9262FC677B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BisleriumBlog.API", "BisleriumBlog.API\BisleriumBlog.API.csproj", "{EAC0125E-8D4E-41BD-9C39-176E2142E893}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		{EAC0125E-8D4E-41BD-9C39-176E2142E893}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAC0125E-8D4E-41BD-9C39-176E2142E893}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAC0125E-8D4E-41BD-9C39-176E2142E893}.Release|Any CPU.Build.0 = Release|Any CPU
-		{798379F8-3AC5-47B2-BE29-6A9262FC677B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{798379F8-3AC5-47B2-BE29-6A9262FC677B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{798379F8-3AC5-47B2-BE29-6A9262FC677B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{798379F8-3AC5-47B2-BE29-6A9262FC677B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
