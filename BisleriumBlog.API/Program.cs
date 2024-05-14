@@ -40,7 +40,7 @@ builder.Services.AddSwaggerGen(swagger =>
                         Id = "Bearer"
                     }
                 },
-                new string[] {}
+            new string[] {}
         }
     });
 });
